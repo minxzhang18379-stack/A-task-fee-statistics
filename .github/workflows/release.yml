@@ -1,0 +1,56 @@
+name: '自动打包发布'
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # 支持手动触发编译
+
+permissions:
+  contents: write
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest' # 在云端苹果 macOS 系统上进行编译
+            args: '--target universal-apple-darwin' # 编译同时支持 Intel 和 M1/M2/M3 芯片的通用版本
+          - platform: 'windows-latest' # 在云端微软 Windows 系统上进行编译
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: 拉取代码仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 安装 Rust 编译链
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # 在 macOS 上支持 universal 通用包打包 (x86_64 和 aarch64)
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: 安装前端依赖
+        run: npm ci
+
+      - name: 云端一键构建并发布 Tauri 安装包
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__ # 自动匹配 package.json 中的版本号
+          releaseName: '稿费与任务统计桌面系统 v__VERSION__'
+          releaseBody: '由 GitHub Actions 全自动多平台编译生成的最新版本，包含 Windows 和 macOS 客户端。'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
