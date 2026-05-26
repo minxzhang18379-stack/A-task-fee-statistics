@@ -11,9 +11,14 @@ export interface Task {
 
 // 1. Detect if running inside Tauri desktop app
 export const isTauri = (): boolean => {
-  return typeof window !== 'undefined' && 
-         (window as any).__TAURI_INTERNALS__ !== undefined && 
-         (window as any).__TAURI_INTERNALS__.metadata !== undefined;
+  try {
+    return typeof window !== 'undefined' && 
+           typeof (window as any).__TAURI_INTERNALS__ !== 'undefined' &&
+           (window as any).__TAURI_INTERNALS__ !== null &&
+           typeof (window as any).__TAURI_INTERNALS__?.metadata !== 'undefined';
+  } catch {
+    return false;
+  }
 };
 
 // Helper: Get robust API URL dynamically mapping dev and prod environments
