@@ -57,20 +57,35 @@ export async function onRequestPost(context) {
   }
 }
 
-// 3. PUT /api/tasks/:id - 更新任务 & 4. DELETE /api/tasks/:id - 删除任务
+// 3. PUT /api/tasks/:id     - 更新任务
+// 4. DELETE /api/tasks/:id  - 删除单个任务
+// 5. DELETE /api/tasks/all  - 清空所有任务（来自设置页面）
 export async function onRequest(context) {
   const { request, env } = context;
   const { DB } = env;
   if (!DB) return new Response(JSON.stringify({ error: "D1 数据库绑定未配置" }), { status: 500, headers });
 
   const url = new URL(request.url);
-  const pathParts = url.pathname.split('/').filter(Boolean); // e.g. ["api", "tasks", "123"]
-  
+  const pathParts = url.pathname.split('/').filter(Boolean); // e.g. ["api", "tasks", "123"] or ["api", "tasks", "all"]
+
   const method = request.method.toUpperCase();
-  
+
   // Custom routing parser for wildcard PUT & DELETE since CF Workers routing is directory-based
   if (pathParts.length === 3 && pathParts[1] === 'tasks') {
-    const id = parseInt(pathParts[2], 10);
+    const segment = pathParts[2];
+
+    // --- DELETE /api/tasks/all: Clear entire table ---
+    if (method === 'DELETE' && segment === 'all') {
+      try {
+        await DB.prepare("DELETE FROM TaskRecord").run();
+        return new Response(JSON.stringify({ success: true, message: "所有任务已清空" }), { headers });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: "清空任务失败", details: err.message }), { status: 500, headers });
+      }
+    }
+
+    // --- PUT or DELETE /api/tasks/:id ---
+    const id = parseInt(segment, 10);
     if (isNaN(id)) {
       return new Response(JSON.stringify({ error: "无效的任务ID" }), { status: 400, headers });
     }
@@ -78,7 +93,7 @@ export async function onRequest(context) {
     if (method === 'PUT') {
       try {
         const { title, photographer, taskType, taskDate, fee } = await request.json();
-        
+
         const cleanTitle = (title || '').split(/\s*地点[：:]\s*/)[0].trim();
         const cleanPhoto = (photographer || '').replace(/\s*[（\(]修图[）\)]/g, '').trim();
 
