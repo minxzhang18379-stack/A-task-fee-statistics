@@ -1,9 +1,52 @@
 import ExcelJS from 'exceljs';
 import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
-import { sendNotification } from '@tauri-apps/plugin-notification';
-import { getTasks, addTask } from './db';
+import { sendNotification as tauriSendNotification } from '@tauri-apps/plugin-notification';
+import { getTasks, addTask, isTauri } from './db';
 import { calculateFee, getPhotographerShares } from '../pages/tasks';
+
+// Browser-compatible file selection and loading helper
+function selectAndReadFile(accept: string, readAsText = false): Promise<{ name: string; data: Uint8Array | string } | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) {
+        resolve(null);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (readAsText) {
+          resolve({ name: file.name, data: reader.result as string });
+        } else {
+          resolve({ name: file.name, data: new Uint8Array(reader.result as ArrayBuffer) });
+        }
+      };
+      reader.onerror = () => resolve(null);
+      if (readAsText) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
+    };
+    input.click();
+  });
+}
+
+// Unified cross-platform notification helper
+function sendNotification(options: { title: string; body: string }) {
+  if (isTauri) {
+    tauriSendNotification(options);
+  } else {
+    console.log(`[Notification] ${options.title}: ${options.body}`);
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(options.title, { body: options.body });
+    }
+  }
+}
 
 // --- Helper to parse and format various date formats into standard YYYY-MM-DD ---
 export function parseAndFormatDate(dateVal: any): string {
@@ -144,16 +187,23 @@ export async function exportToExcel(specificTasks?: any[], filenamePrefix = "稿
       startRow = 3;
     } else {
       // 2. Original External Template Loading Method (fully backward compatible)
-      const templatePath = await open({
-        title: '选择 Excel 模板文件',
-        filters: [{ name: 'Excel 文件', extensions: ['xlsx', 'xls'] }],
-        directory: false,
-        multiple: false,
-      });
+      let fileData: Uint8Array;
+      if (isTauri) {
+        const templatePath = await open({
+          title: '选择 Excel 模板文件',
+          filters: [{ name: 'Excel 文件', extensions: ['xlsx', 'xls'] }],
+          directory: false,
+          multiple: false,
+        });
 
-      if (!templatePath || typeof templatePath !== 'string') return;
+        if (!templatePath || typeof templatePath !== 'string') return;
+        fileData = await readFile(templatePath);
+      } else {
+        const fileResult = await selectAndReadFile('.xlsx,.xls');
+        if (!fileResult) return;
+        fileData = fileResult.data as Uint8Array;
+      }
 
-      const fileData = await readFile(templatePath);
       await workbook.xlsx.load(fileData);
 
       worksheet = workbook.worksheets[0];
@@ -252,24 +302,43 @@ export async function exportToExcel(specificTasks?: any[], filenamePrefix = "稿
       }
     }
 
-    // 7. Choose save location
-    const savePath = await save({
-      title: '保存报表',
-      filters: [{ name: 'Excel 文件', extensions: ['xlsx'] }],
-      defaultPath: `${defaultFilename}.xlsx`,
-    });
-
-    if (!savePath) return;
-
-    // 8. Write file
     const buffer = await workbook.xlsx.writeBuffer();
-    await writeFile(savePath, new Uint8Array(buffer));
 
-    // 9. Notify
-    sendNotification({
-      title: '导出成功',
-      body: `报表已成功保存`,
-    });
+    if (isTauri) {
+      // 7. Choose save location (Tauri)
+      const savePath = await save({
+        title: '保存报表',
+        filters: [{ name: 'Excel 文件', extensions: ['xlsx'] }],
+        defaultPath: `${defaultFilename}.xlsx`,
+      });
+
+      if (!savePath) return;
+
+      // 8. Write file (Tauri)
+      await writeFile(savePath, new Uint8Array(buffer));
+
+      // 9. Notify
+      sendNotification({
+        title: '导出成功',
+        body: `报表已成功保存`,
+      });
+    } else {
+      // Web browser file download
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${defaultFilename}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      sendNotification({
+        title: '导出成功',
+        body: `报表已下载到您的本地设备`,
+      });
+    }
   } catch (error) {
     console.error('Export failed:', error);
     sendNotification({
@@ -447,24 +516,43 @@ export async function exportPersonalBill(tasks: any[], filenamePrefix: string, l
       currentRow++;
     }
 
-    // 3. Select save location
-    const savePath = await save({
-      title: language === "zh" ? '保存个人账单' : 'Save Personal Bill',
-      filters: [{ name: 'Excel 文件', extensions: ['xlsx'] }],
-      defaultPath: `${filenamePrefix}.xlsx`,
-    });
-
-    if (!savePath) return;
-
-    // 4. Save Excel
     const buffer = await workbook.xlsx.writeBuffer();
-    await writeFile(savePath, new Uint8Array(buffer));
 
-    // 5. Notify success
-    sendNotification({
-      title: language === "zh" ? '导出成功' : 'Export Succeeded',
-      body: language === "zh" ? `个人账单已成功保存` : `Personal bill saved successfully`,
-    });
+    if (isTauri) {
+      // 3. Select save location (Tauri)
+      const savePath = await save({
+        title: language === "zh" ? '保存个人账单' : 'Save Personal Bill',
+        filters: [{ name: 'Excel 文件', extensions: ['xlsx'] }],
+        defaultPath: `${filenamePrefix}.xlsx`,
+      });
+
+      if (!savePath) return;
+
+      // 4. Save Excel (Tauri)
+      await writeFile(savePath, new Uint8Array(buffer));
+
+      // 5. Notify success (Tauri)
+      sendNotification({
+        title: language === "zh" ? '导出成功' : 'Export Succeeded',
+        body: language === "zh" ? `个人账单已成功保存` : `Personal bill saved successfully`,
+      });
+    } else {
+      // Web browser file download
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filenamePrefix}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      sendNotification({
+        title: language === "zh" ? '导出成功' : 'Export Succeeded',
+        body: language === "zh" ? `个人账单已下载到您的本地设备` : `Personal bill downloaded to your device`,
+      });
+    }
   } catch (error) {
     console.error('Export personal bill failed:', error);
     sendNotification({
@@ -481,18 +569,25 @@ export async function exportPersonalBill(tasks: any[], filenamePrefix: string, l
 // --- Batch Import Tasks from Excel (With Smart Header Detection and Auto-Type/Fee calculations) ---
 export async function importFromExcel(): Promise<number> {
   try {
-    // 1. Select Excel data file to import
-    const filePath = await open({
-      title: '选择要导入的 Excel 数据文件',
-      filters: [{ name: 'Excel 文件', extensions: ['xlsx', 'xls'] }],
-      directory: false,
-      multiple: false,
-    });
+    let fileData: Uint8Array;
+    if (isTauri) {
+      // 1. Select Excel data file to import (Tauri)
+      const filePath = await open({
+        title: '选择要导入的 Excel 数据文件',
+        filters: [{ name: 'Excel 文件', extensions: ['xlsx', 'xls'] }],
+        directory: false,
+        multiple: false,
+      });
 
-    if (!filePath || typeof filePath !== 'string') return 0;
+      if (!filePath || typeof filePath !== 'string') return 0;
 
-    // 2. Read file
-    const fileData = await readFile(filePath);
+      // 2. Read file (Tauri)
+      fileData = await readFile(filePath);
+    } else {
+      const fileResult = await selectAndReadFile('.xlsx,.xls');
+      if (!fileResult) return 0;
+      fileData = fileResult.data as Uint8Array;
+    }
 
     // 3. Load ExcelJS Workbook
     const workbook = new ExcelJS.Workbook();
@@ -629,19 +724,26 @@ export async function importFromExcel(): Promise<number> {
 // --- Batch Import Tasks from TXT Files ---
 export async function importFromTxt(): Promise<number> {
   try {
-    // 1. Select TXT file
-    const filePath = await open({
-      title: '选择要导入的 TXT 数据文件',
-      filters: [{ name: '文本文件', extensions: ['txt'] }],
-      directory: false,
-      multiple: false,
-    });
+    let fileContent = '';
+    if (isTauri) {
+      // 1. Select TXT file (Tauri)
+      const filePath = await open({
+        title: '选择要导入的 TXT 数据文件',
+        filters: [{ name: '文本文件', extensions: ['txt'] }],
+        directory: false,
+        multiple: false,
+      });
 
-    if (!filePath || typeof filePath !== 'string') return 0;
+      if (!filePath || typeof filePath !== 'string') return 0;
 
-    // 2. Read file
-    const fileData = await readFile(filePath);
-    const fileContent = new TextDecoder('utf-8').decode(fileData);
+      // 2. Read file (Tauri)
+      const fileData = await readFile(filePath);
+      fileContent = new TextDecoder('utf-8').decode(fileData);
+    } else {
+      const fileResult = await selectAndReadFile('.txt', true);
+      if (!fileResult) return 0;
+      fileContent = fileResult.data as string;
+    }
 
     // 3. Parse lines
     const lines = fileContent.split(/\r?\n/);

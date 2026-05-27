@@ -482,26 +482,6 @@ export default function StatsPage() {
                 <Calendar className="w-4 h-4 text-primary" />
                 {t("stats.tableMonth.month")}
               </CardTitle>
-              {monthlyStats.length > 0 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs gap-1.5 cursor-pointer"
-                  onClick={() => {
-                    const dataToExport = monthlyStats.map(item => ({
-                      [t("stats.tableMonth.month")]: item.month,
-                      [language === "zh" ? "总登记任务量" : "Total Tasks"]: item.totalTasks,
-                      [language === "zh" ? "重大任务数" : "Major Tasks"]: item.majorCount,
-                      [language === "zh" ? "非重大任务数" : "Minor Tasks"]: item.nonMajorCount,
-                      [t("stats.tableMonth.feeSum")]: item.feeSum,
-                    }));
-                    exportToExcel(dataToExport, language === "zh" ? "月度统计数据汇总" : "Monthly_Breakdown_Report");
-                  }}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  {t("stats.tableMonth.exportBtn")}
-                </Button>
-              )}
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">

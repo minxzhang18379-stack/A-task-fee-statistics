@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, CheckSquare, Settings, Moon, Sun, BarChart3 } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Settings, Moon, Sun, BarChart3, LogOut } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { useLanguage } from "./language-provider";
 import { Button } from "./ui/button";
@@ -123,14 +123,31 @@ export function Layout() {
               return currentItem ? t(currentItem.key) : "";
             })()}
           </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-md"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-md"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-md text-red-500 hover:text-red-600 hover:bg-red-500/10"
+              onClick={() => {
+                if (window.confirm("确定要退出登录吗？")) {
+                  if ((window as any).pannLogout) {
+                    (window as any).pannLogout();
+                  }
+                }
+              }}
+              title="退出登录"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </header>
 
         {/* Content Panel (Animated Route Outlet) */}

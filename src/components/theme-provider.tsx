@@ -49,7 +49,10 @@ export function ThemeProvider({
     root.classList.add(theme)
     
     // Sync with Tauri native window theme if available
-    getCurrentWindow().setTheme(theme === "dark" ? "dark" : "light").catch(() => {});
+    const isTauri = typeof window !== "undefined" && (window as any).__TAURI_INTERNALS__ !== undefined;
+    if (isTauri) {
+      getCurrentWindow().setTheme(theme === "dark" ? "dark" : "light").catch(() => {});
+    }
   }, [theme])
 
   const value = {
