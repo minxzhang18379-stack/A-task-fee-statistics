@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { useLanguage } from "@/components/language-provider";
-import { initDb } from "@/lib/db";
+// db functions are dynamically imported inside handlers (isTauri/initDb)
 import logo from "../assets/logo.png";
 import { 
   Database, 
@@ -32,8 +32,19 @@ export default function SettingsPage() {
   useEffect(() => {
     async function checkDb() {
       try {
-        await initDb();
-        setDbStatus("已连接 SQLite 数据库 (Active)");
+        const { isTauri: checkTauri, initDb } = await import('@/lib/db');
+        if (checkTauri()) {
+          await initDb();
+          setDbStatus("已连接 SQLite 数据库 (Active)");
+        } else {
+          // Web environment: check D1 API connectivity
+          const response = await fetch('/api/tasks');
+          if (response.ok) {
+            setDbStatus("已连接 Cloudflare D1 数据库 (Active)");
+          } else {
+            setDbStatus("D1 API 响应异常，请检查数据库绑定");
+          }
+        }
       } catch (e) {
         setDbStatus("连接失败: " + (e instanceof Error ? e.message : String(e)));
       }
@@ -54,11 +65,21 @@ export default function SettingsPage() {
     localStorage.setItem("export_filename", exportFilename);
   }, [exportFilename]);
 
-  // Clean database using the correct single-table schema
+  // Clean database - works for both Tauri (SQLite) and Web (D1 API)
   const handleClearDatabase = async () => {
     try {
-      const db = await initDb();
-      await db.execute("DELETE FROM TaskRecord");
+      const { isTauri: checkTauri, initDb } = await import('@/lib/db');
+      if (checkTauri()) {
+        // Tauri/SQLite environment
+        const db = await initDb();
+        if (db) {
+          await db.execute("DELETE FROM TaskRecord");
+        }
+      } else {
+        // Web / Cloudflare D1 environment: call a dedicated clear API
+        const response = await fetch('/api/tasks/all', { method: 'DELETE' });
+        if (!response.ok) throw new Error("API 返回错误: " + response.status);
+      }
       setDbStatus(t("settings.cardDb.dbCleared"));
       setShowClearConfirm(false);
       alert(t("settings.cardDb.alertSuccess"));

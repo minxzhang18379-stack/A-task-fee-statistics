@@ -13,20 +13,20 @@ export interface Task {
   fee: number;          // 稿费
 }
 
-// Get active database mode
+// 获取当前数据库模式 (云端同步 / 本地单机)
 export const getDbMode = (): 'cloud' | 'local' => {
-  if (!isTauri) return 'cloud'; // Browser always runs in cloud sync mode
+  if (!isTauri) return 'cloud'; // 网页版始终为云端同步模式
   return (localStorage.getItem('pann_db_mode') as 'cloud' | 'local') || 'local';
 };
 
-// Get remote server API base URL
+// 获取远程 Cloudflare Pages API 地址
 const getApiBase = (): string => {
-  if (!isTauri) return ''; // Relative paths inside the browser
+  if (!isTauri) return ''; // 网页版使用相对路径
   const storedUrl = localStorage.getItem('pann_server_url') || '';
   return storedUrl.replace(/\/$/, '');
 };
 
-// Get Authorization headers
+// 获取认证 Header
 const getHeaders = () => {
   const password = localStorage.getItem('pann_password') || '';
   return {
@@ -35,7 +35,7 @@ const getHeaders = () => {
   };
 };
 
-// Central HTTP REST Client for Cloudflare D1 backend
+// 统一的云端 D1 数据库 REST 客户端
 const cloudFetch = async (method: string, path: string, body?: any) => {
   const base = getApiBase();
   const url = `${base}${path}`;
@@ -52,22 +52,22 @@ const cloudFetch = async (method: string, path: string, body?: any) => {
   
   if (!res.ok) {
     if (res.status === 401) {
-      // Auto sign out on authorization expiration
+      // 密码过期或错误，自动登出并刷新
       localStorage.removeItem('pann_authenticated');
       localStorage.removeItem('pann_password');
       window.location.reload();
       throw new Error('会话过期，请重新登录');
     }
     const errText = await res.text();
-    throw new Error(errText || `API error: ${res.status}`);
+    throw new Error(errText || `API 错误: ${res.status}`);
   }
   return res;
 };
 
-// Initialize native SQLite (Tauri-only)
+// 初始化本地 SQLite 数据库 (仅在桌面端可用)
 export const initDb = async () => {
   if (!isTauri) {
-    throw new Error('Local SQLite is only supported in Tauri desktop app.');
+    throw new Error('本地 SQLite 数据库仅在桌面端软件中受支持');
   }
 
   if (!dbInstance) {
@@ -102,7 +102,7 @@ export const initDb = async () => {
         WHERE INSTR(title, '地点:') > 0
       `);
     } catch (e) {
-      console.error("Failed to run startup database name/title cleaning:", e);
+      console.error("启动时本地数据库名字/标题清洗失败:", e);
     }
 
     try { await dbInstance.execute("DROP TABLE IF EXISTS Remuneration"); } catch (_) {}
@@ -111,7 +111,7 @@ export const initDb = async () => {
   return dbInstance;
 };
 
-// --- Simplified CRUD Router (Dynamic Cloud API vs Local SQLite) ---
+// --- CRUD 操作分流路由器 ---
 
 export const getTasks = async (): Promise<Task[]> => {
   if (getDbMode() === 'cloud') {
