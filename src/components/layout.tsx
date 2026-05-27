@@ -20,6 +20,14 @@ export function Layout() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const userRole = localStorage.getItem('pann_user_role') || 'admin';
+  const filteredNavItems = navItems.filter(item => {
+    if (userRole === 'member' && item.path === '/settings') {
+      return false;
+    }
+    return true;
+  });
+
   // Load saved sidebar width from local storage, defaulting to 224px (w-56)
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
@@ -116,7 +124,7 @@ export function Layout() {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             return (

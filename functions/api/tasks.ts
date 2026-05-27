@@ -1,6 +1,7 @@
 interface Env {
   DB: D1Database;
   API_PASSWORD?: string;
+  MEMBER_PASSWORD?: string;
 }
 
 const corsHeaders = {
@@ -10,11 +11,20 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-// Helper to check Bearer token auth
-function isAuthorized(request: Request, env: Env): boolean {
-  const validPassword = env.API_PASSWORD || "admin123";
+// Helper to check Bearer token auth and return active user role
+function getUserRole(request: Request, env: Env): 'admin' | 'member' | null {
+  const adminPassword = env.API_PASSWORD || "admin123";
+  const memberPassword = env.MEMBER_PASSWORD || "member123";
   const authHeader = request.headers.get("Authorization");
-  return authHeader === `Bearer ${validPassword}`;
+  
+  if (!authHeader) return null;
+  if (authHeader === `Bearer ${adminPassword}`) {
+    return 'admin';
+  }
+  if (authHeader === `Bearer ${memberPassword}`) {
+    return 'member';
+  }
+  return null;
 }
 
 // Handler for CORS preflight options
@@ -28,8 +38,9 @@ export const onRequestOptions: PagesFunction<Env> = async () => {
 // GET: Fetch all task records
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
+  const role = getUserRole(request, env);
 
-  if (!isAuthorized(request, env)) {
+  if (!role) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -55,8 +66,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 // POST: Add a new task record
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
+  const role = getUserRole(request, env);
 
-  if (!isAuthorized(request, env)) {
+  if (!role) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,7 +84,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       fee: number;
     };
 
-    // Clean data just in case, matching frontend db.ts requirements
     const cleanTitle = (task.title || '').split(/\s*地点[：:]\s*/)[0].trim();
     const cleanPhoto = (task.photographer || '').replace(/\s*[（\(]修图[）\)]/g, '').trim();
 
@@ -99,8 +110,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 // PUT: Update an existing task record
 export const onRequestPut: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
+  const role = getUserRole(request, env);
 
-  if (!isAuthorized(request, env)) {
+  if (!role) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -124,7 +136,6 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Clean data matching frontend db.ts requirements
     const cleanTitle = (task.title || '').split(/\s*地点[：:]\s*/)[0].trim();
     const cleanPhoto = (task.photographer || '').replace(/\s*[（\(]修图[）\)]/g, '').trim();
 
@@ -145,19 +156,30 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 };
 
-// DELETE: Delete a task record by ID
+// DELETE: Delete a task record by ID (ADMIN ONLY!)
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
+  const role = getUserRole(request, env);
 
-  if (!isAuthorized(request, env)) {
+  if (!role) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
+  // Strict role checking on delete requests
+  if (role !== "admin") {
+    return new Response(
+      JSON.stringify({ error: "Forbidden: Only Administrators are allowed to delete tasks" }),
+      {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
   try {
-    // Read the ID from the URL query params e.g. /api/tasks?id=123
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
 

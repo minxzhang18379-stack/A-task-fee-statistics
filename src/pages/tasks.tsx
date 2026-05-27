@@ -112,6 +112,7 @@ export const getPhotographerShares = (
 
 export default function TasksPage() {
   const { t, language } = useLanguage();
+  const userRole = localStorage.getItem('pann_user_role') || 'admin';
   const [tasks, setTasks] = useState<Task[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -626,20 +627,22 @@ export default function TasksPage() {
             >
               <Edit className="h-3.5 w-3.5 mr-1" /> {t("tasks.table.btnEdit")}
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-              onClick={() => handleDeleteTask(task.id!)}
-              title={t("tasks.table.btnDelete")}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            {userRole === 'admin' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                onClick={() => handleDeleteTask(task.id!)}
+                title={t("tasks.table.btnDelete")}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         );
       },
     },
-  ], [openEditDialog, handleDeleteTask, t, language]);
+  ], [openEditDialog, handleDeleteTask, t, language, userRole]);
 
   const table = useReactTable({
     data: filteredTasks,
@@ -681,12 +684,16 @@ export default function TasksPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2 cursor-pointer border-emerald-300 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/60 dark:border-emerald-950/40 dark:bg-emerald-950/20 dark:text-emerald-400 font-semibold" onClick={handleBatchImport}>
-            <Download className="h-4 w-4" /> {t("tasks.importExcel")}
-          </Button>
-          <Button variant="outline" className="gap-2 cursor-pointer border-blue-300 bg-blue-50/50 text-blue-700 hover:bg-blue-100/60 dark:border-blue-950/40 dark:bg-blue-950/20 dark:text-blue-400 font-semibold" onClick={handleTxtImport}>
-            <FileText className="h-4 w-4" /> {t("tasks.importTxt")}
-          </Button>
+          {userRole === 'admin' && (
+            <>
+              <Button variant="outline" className="gap-2 cursor-pointer border-emerald-300 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/60 dark:border-emerald-950/40 dark:bg-emerald-950/20 dark:text-emerald-400 font-semibold" onClick={handleBatchImport}>
+                <Download className="h-4 w-4" /> {t("tasks.importExcel")}
+              </Button>
+              <Button variant="outline" className="gap-2 cursor-pointer border-blue-300 bg-blue-50/50 text-blue-700 hover:bg-blue-100/60 dark:border-blue-950/40 dark:bg-blue-950/20 dark:text-blue-400 font-semibold" onClick={handleTxtImport}>
+                <FileText className="h-4 w-4" /> {t("tasks.importTxt")}
+              </Button>
+            </>
+          )}
           <Button className="gap-2 shadow-xs cursor-pointer font-bold" onClick={openAddDialog}>
             <Plus className="h-4 w-4" /> {t("tasks.addTask")}
           </Button>
@@ -701,14 +708,16 @@ export default function TasksPage() {
               <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse" />
               <span className="text-sm font-bold text-primary">{t("tasks.batchPanel.title", { count: selectedCount })}</span>
             </div>
-            <Button
-              size="sm"
-              variant="destructive"
-              className="gap-1 cursor-pointer py-1.5 h-auto text-xs font-bold"
-              onClick={handleBatchDelete}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> {t("tasks.batchPanel.btnDelete")}
-            </Button>
+            {userRole === 'admin' && (
+              <Button
+                size="sm"
+                variant="destructive"
+                className="gap-1 cursor-pointer py-1.5 h-auto text-xs font-bold"
+                onClick={handleBatchDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> {t("tasks.batchPanel.btnDelete")}
+              </Button>
+            )}
           </div>
           
           <div className="grid gap-4 sm:grid-cols-3 text-xs">

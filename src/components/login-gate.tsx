@@ -64,7 +64,7 @@ export function LoginGate({ children }: LoginGateProps) {
   const validateCredentials = async (url: string, pass: string, isAutoLogin = false): Promise<boolean> => {
     try {
       const cleanUrl = url.replace(/\/$/, "");
-      const res = await fetch(`${cleanUrl}/api/tasks`, {
+      const res = await fetch(`${cleanUrl}/api/auth`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${pass}`,
@@ -72,6 +72,8 @@ export function LoginGate({ children }: LoginGateProps) {
       });
 
       if (res.status === 200) {
+        const data = await res.json() as { role: 'admin' | 'member' };
+        localStorage.setItem("pann_user_role", data.role);
         return true;
       }
       return false;
@@ -95,6 +97,7 @@ export function LoginGate({ children }: LoginGateProps) {
         return;
       }
       localStorage.setItem("pann_db_mode", "local");
+      localStorage.setItem("pann_user_role", "admin"); // Default to admin for offline SQLite
       localStorage.setItem("pann_authenticated", "true");
       setIsAuthenticated(true);
       setLoading(false);
@@ -143,6 +146,7 @@ export function LoginGate({ children }: LoginGateProps) {
     localStorage.removeItem("pann_db_mode");
     localStorage.removeItem("pann_server_url");
     localStorage.removeItem("pann_password");
+    localStorage.removeItem("pann_user_role");
     setIsAuthenticated(false);
   };
 
