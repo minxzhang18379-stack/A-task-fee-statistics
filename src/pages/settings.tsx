@@ -167,7 +167,7 @@ export default function SettingsPage() {
               </CardTitle>
               <CardDescription>{t("settings.cardTheme.desc")}</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-3">
+            <CardContent className="grid grid-cols-2 gap-3">
               <Button
                 variant={theme === "light" ? "default" : "outline"}
                 className="gap-2 justify-center py-6 h-auto cursor-pointer font-semibold"
@@ -183,14 +183,6 @@ export default function SettingsPage() {
               >
                 <Moon className="w-4 h-4" />
                 {t("settings.cardTheme.themeDark")}
-              </Button>
-              <Button
-                variant={theme === "system" ? "default" : "outline"}
-                className="gap-2 justify-center py-6 h-auto cursor-pointer font-semibold"
-                onClick={() => setTheme("system")}
-              >
-                <Laptop className="w-4 h-4" />
-                {t("settings.cardTheme.themeSystem")}
               </Button>
             </CardContent>
           </Card>
