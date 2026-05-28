@@ -28,10 +28,10 @@ const getApiBase = (): string => {
 
 // 获取认证 Header
 const getHeaders = () => {
-  const password = localStorage.getItem('pann_password') || '';
+  const token = localStorage.getItem('pann_jwt_token') || '';
   return {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${password}`,
+    'Authorization': `Bearer ${token}`,
   };
 };
 
@@ -52,11 +52,12 @@ const cloudFetch = async (method: string, path: string, body?: any) => {
   
   if (!res.ok) {
     if (res.status === 401) {
-      // 密码过期或错误，自动登出并刷新
+      // 会话过期或错误，自动登出并刷新
       localStorage.removeItem('pann_authenticated');
-      localStorage.removeItem('pann_password');
+      localStorage.removeItem('pann_jwt_token');
+      localStorage.removeItem('pann_user_role');
       window.location.reload();
-      throw new Error('会话过期，请重新登录');
+      throw new Error('会话已过期，请重新登录');
     }
     const errText = await res.text();
     throw new Error(errText || `API 错误: ${res.status}`);

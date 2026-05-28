@@ -24,7 +24,7 @@ export function LoginGate({ children }: LoginGateProps) {
     const storedAuth = localStorage.getItem("pann_authenticated");
     const storedMode = localStorage.getItem("pann_db_mode");
     const storedServer = localStorage.getItem("pann_server_url");
-    const storedPass = localStorage.getItem("pann_password");
+    const storedToken = localStorage.getItem("pann_jwt_token");
 
     if (storedMode === "local" && isTauri) {
       setMode("local");
@@ -33,22 +33,24 @@ export function LoginGate({ children }: LoginGateProps) {
       return;
     }
 
-    if (storedAuth === "true" && storedPass) {
-      // Auto-validate stored password
+    if (storedAuth === "true" && storedToken) {
+      // Auto-validate stored JWT session token
       const url = isTauri ? (storedServer || "") : window.location.origin;
-      validateCredentials(url, storedPass, true)
+      validateJwt(url, storedToken)
         .then((isValid) => {
           if (isValid) {
             setIsAuthenticated(true);
           } else {
-            // Clear invalid stored credentials
+            // Clear expired session token
             localStorage.removeItem("pann_authenticated");
+            localStorage.removeItem("pann_jwt_token");
+            localStorage.removeItem("pann_user_role");
             setAuthError("会话已过期，请重新登录");
           }
           setLoading(false);
         })
         .catch(() => {
-          // If network is offline but we have stored auth, let desktop users access local standalone or show error
+          // Fallback if remote server is unreachable
           if (isTauri) {
             setAuthError("无法连接到云端数据库，您可在下方切换到本地离线模式");
           } else {
@@ -61,7 +63,23 @@ export function LoginGate({ children }: LoginGateProps) {
     }
   }, []);
 
-  const validateCredentials = async (url: string, pass: string, isAutoLogin = false): Promise<boolean> => {
+  // Quick verification request using JWT to see if session is still alive
+  const validateJwt = async (url: string, token: string): Promise<boolean> => {
+    try {
+      const cleanUrl = url.replace(/\/$/, "");
+      const res = await fetch(`${cleanUrl}/api/tasks`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      return res.status === 200;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  const validateCredentials = async (url: string, pass: string): Promise<{ token: string; role: 'admin' | 'member' } | null> => {
     try {
       const cleanUrl = url.replace(/\/$/, "");
       const res = await fetch(`${cleanUrl}/api/auth`, {
@@ -72,16 +90,12 @@ export function LoginGate({ children }: LoginGateProps) {
       });
 
       if (res.status === 200) {
-        const data = await res.json() as { role: 'admin' | 'member' };
-        localStorage.setItem("pann_user_role", data.role);
-        return true;
+        const data = await res.json() as { token: string; role: 'admin' | 'member' };
+        return data;
       }
-      return false;
+      return null;
     } catch (err) {
-      if (isAutoLogin) {
-        throw err; // propagate up for auto-login error handling
-      }
-      return false;
+      return null;
     }
   };
 
@@ -122,12 +136,13 @@ export function LoginGate({ children }: LoginGateProps) {
 
     try {
       const cleanServer = targetServer.replace(/\/$/, "");
-      const isValid = await validateCredentials(cleanServer, password);
+      const authData = await validateCredentials(cleanServer, password);
 
-      if (isValid) {
+      if (authData) {
         localStorage.setItem("pann_db_mode", "cloud");
         localStorage.setItem("pann_server_url", cleanServer);
-        localStorage.setItem("pann_password", password);
+        localStorage.setItem("pann_jwt_token", authData.token);
+        localStorage.setItem("pann_user_role", authData.role);
         localStorage.setItem("pann_authenticated", "true");
         setIsAuthenticated(true);
       } else {
@@ -145,7 +160,7 @@ export function LoginGate({ children }: LoginGateProps) {
     localStorage.removeItem("pann_authenticated");
     localStorage.removeItem("pann_db_mode");
     localStorage.removeItem("pann_server_url");
-    localStorage.removeItem("pann_password");
+    localStorage.removeItem("pann_jwt_token");
     localStorage.removeItem("pann_user_role");
     setIsAuthenticated(false);
   };
