@@ -41,29 +41,29 @@
 ```mermaid
 graph TD
     subgraph ClientLayer ["客户端层 (多端适配)"]
-        WebClient[Web网页/手机端浏览器] -->|标准 HTTPS 请求| CF_Gateway
-        TauriClient[Tauri 桌面端 .exe] -->|API 请求 (携带 JWT)| CF_Gateway
-        TauriClient -.->|无网状态下自动降级| LocalSQLite[(本地物理 SQLite tasks.db)]
+        WebClient["Web网页/手机端浏览器"] -->|"标准 HTTPS 请求"| CF_Gateway
+        TauriClient["Tauri 桌面端 (.exe)"] -->|"API 请求 (携带 JWT)"| CF_Gateway
+        TauriClient -.->|"无网状态下自动降级"| LocalSQLite[("本地物理 SQLite (tasks.db)")]
     end
 
     subgraph ServerLayer ["服务端 (Cloudflare Serverless 边缘网络)"]
-        CF_Gateway{CF _middleware.ts 拦截器}
-        CF_Gateway -->|CORS 拦截 / 全局未捕获异常捕捉| CORS_Gate[跨域与异常处理器]
-        CF_Gateway -->|JWT 令牌解密与状态拦截| Auth_Gate[鉴权拦截器]
+        CF_Gateway{"CF _middleware.ts 拦截器"}
+        CF_Gateway -->|"CORS 拦截 / 全局未捕获异常捕捉"| CORS_Gate["跨域与异常处理器"]
+        CF_Gateway -->|"JWT 令牌解密与状态拦截"| Auth_Gate["鉴权拦截器"]
         
-        Auth_Gate -->|通过: 解析claims存入 context.data| Route_API[API 路由分配]
+        Auth_Gate -->|"通过: 解析 claims 存入 context.data"| Route_API["API 路由分配"]
         
-        Route_API -->|POST /api/auth 登录| Auth_API[auth.ts 数据库校验与加盐比对]
-        Route_API -->|/api/tasks 任务| Task_API[tasks.ts 任务 CRUD 极简控制器]
-        Route_API -->|DELETE /api/tasks/all 清除| Clear_API[tasks/all.ts 专用清库控制器]
-        Route_API -->|/api/admin/users 账号| Admin_API[admin/users.ts 密码管理终端API]
+        Route_API -->|"POST /api/auth 登录"| Auth_API["auth.ts 数据库校验与加盐比对"]
+        Route_API -->|"/api/tasks 任务"| Task_API["tasks.ts 任务 CRUD 极简控制器"]
+        Route_API -->|"DELETE /api/tasks/all 清除"| Clear_API["tasks/all.ts 专用清库控制器"]
+        Route_API -->|"/api/admin/users 账号"| Admin_API["admin/users.ts 密码管理终端 API"]
     end
 
     subgraph StorageLayer ["存储层 (边缘分布式 SQLite)"]
-        Task_API -->|D1 API 查询| D1[(Cloudflare D1 SQLite 数据库)]
-        Clear_API -->|D1 API 清空| D1
-        Auth_API -->|查询用户凭证| D1
-        Admin_API -->|CRUD 用户账户| D1
+        Task_API -->|"D1 API 查询"| D1[("Cloudflare D1 SQLite 数据库")]
+        Clear_API -->|"D1 API 清空"| D1
+        Auth_API -->|"查询用户凭证"| D1
+        Admin_API -->|"CRUD 用户账户"| D1
     end
 ```
 
