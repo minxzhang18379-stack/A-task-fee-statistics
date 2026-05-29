@@ -113,6 +113,7 @@ export const getPhotographerShares = (
 export default function TasksPage() {
   const { t, language } = useLanguage();
   const userRole = localStorage.getItem('pann_user_role') || 'admin';
+  const hasWritePermission = userRole === 'admin' || userRole === 'manager';
   const [tasks, setTasks] = useState<Task[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -628,7 +629,7 @@ export default function TasksPage() {
               >
                 <Edit className="h-3.5 w-3.5 mr-1" /> {t("tasks.table.btnEdit")}
               </Button>
-              {userRole === 'admin' && (
+              {hasWritePermission && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -644,7 +645,7 @@ export default function TasksPage() {
         },
       },
     ];
-    return userRole === 'admin'
+    return hasWritePermission
       ? cols
       : cols.filter(c => c.id !== 'select' && c.id !== 'actions');
   }, [openEditDialog, handleDeleteTask, t, language, userRole]);
@@ -689,7 +690,7 @@ export default function TasksPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {userRole === 'admin' && (
+          {hasWritePermission && (
             <>
               <Button variant="outline" className="gap-2 cursor-pointer border-emerald-300 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/60 dark:border-emerald-950/40 dark:bg-emerald-950/20 dark:text-emerald-400 font-semibold" onClick={handleBatchImport}>
                 <Download className="h-4 w-4" /> {t("tasks.importExcel")}
@@ -713,7 +714,7 @@ export default function TasksPage() {
               <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse" />
               <span className="text-sm font-bold text-primary">{t("tasks.batchPanel.title", { count: selectedCount })}</span>
             </div>
-            {userRole === 'admin' && (
+            {hasWritePermission && (
               <Button
                 size="sm"
                 variant="destructive"
@@ -881,7 +882,7 @@ export default function TasksPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {userRole === 'admin' && (
+                    {hasWritePermission && (
                       <input
                         type="checkbox"
                         className="rounded border-input h-4 w-4 cursor-pointer accent-primary shrink-0"
@@ -926,7 +927,7 @@ export default function TasksPage() {
                       ¥{Number(task.fee || 0).toFixed(2)}
                     </span>
                   </div>
-                  {userRole === 'admin' && (
+                  {hasWritePermission && (
                     <div className="flex items-center gap-1.5">
                       <Button
                         variant="outline"

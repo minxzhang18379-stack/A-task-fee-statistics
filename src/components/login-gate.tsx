@@ -80,7 +80,7 @@ export function LoginGate({ children }: LoginGateProps) {
     }
   };
 
-  const validateCredentials = async (url: string, user: string, pass: string): Promise<{ token: string; role: 'admin' | 'member' } | null> => {
+  const validateCredentials = async (url: string, user: string, pass: string): Promise<{ token: string; role: 'admin' | 'member' | 'manager' } | null> => {
     try {
       const cleanUrl = url.replace(/\/$/, "");
       const res = await fetch(`${cleanUrl}/api/auth`, {
@@ -92,7 +92,7 @@ export function LoginGate({ children }: LoginGateProps) {
       });
 
       if (res.status === 200) {
-        const data = await res.json() as { token: string; role: 'admin' | 'member' };
+        const data = await res.json() as { token: string; role: 'admin' | 'member' | 'manager' };
         return data;
       }
       return null;

@@ -5,7 +5,7 @@ interface Env {
 // User context interface populated by auth middleware
 interface UserContextData {
   user?: {
-    role: 'admin' | 'member';
+    role: 'admin' | 'member' | 'manager';
     exp: number;
   };
 }
@@ -28,10 +28,10 @@ export const onRequestPost: PagesFunction<Env, any, UserContextData> = async (co
   const { request, env, data } = context;
   const user = data.user;
 
-  // Strict role checking: only admin is authorized to add tasks
-  if (!user || user.role !== "admin") {
+  // Strict role checking: only admin/manager is authorized to add tasks
+  if (!user || (user.role !== "admin" && user.role !== "manager")) {
     return new Response(
-      JSON.stringify({ error: "Forbidden: Only Administrators are allowed to add tasks" }),
+      JSON.stringify({ error: "Forbidden: Only Administrators and Data Managers are allowed to add tasks" }),
       {
         status: 403,
         headers: { "Content-Type": "application/json" },
@@ -69,10 +69,10 @@ export const onRequestPut: PagesFunction<Env, any, UserContextData> = async (con
   const { request, env, data } = context;
   const user = data.user;
 
-  // Strict role checking: only admin is authorized to edit tasks
-  if (!user || user.role !== "admin") {
+  // Strict role checking: only admin/manager is authorized to edit tasks
+  if (!user || (user.role !== "admin" && user.role !== "manager")) {
     return new Response(
-      JSON.stringify({ error: "Forbidden: Only Administrators are allowed to edit tasks" }),
+      JSON.stringify({ error: "Forbidden: Only Administrators and Data Managers are allowed to edit tasks" }),
       {
         status: 403,
         headers: { "Content-Type": "application/json" },
@@ -116,9 +116,9 @@ export const onRequestDelete: PagesFunction<Env, any, UserContextData> = async (
   const user = data.user;
 
   // Strict role checking on delete requests
-  if (!user || user.role !== "admin") {
+  if (!user || (user.role !== "admin" && user.role !== "manager")) {
     return new Response(
-      JSON.stringify({ error: "Forbidden: Only Administrators are allowed to delete tasks" }),
+      JSON.stringify({ error: "Forbidden: Only Administrators and Data Managers are allowed to delete tasks" }),
       {
         status: 403,
         headers: { "Content-Type": "application/json" },

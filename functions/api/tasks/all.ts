@@ -4,7 +4,7 @@ interface Env {
 
 interface UserContextData {
   user?: {
-    role: 'admin' | 'member';
+    role: 'admin' | 'member' | 'manager';
     exp: number;
   };
 }

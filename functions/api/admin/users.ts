@@ -7,7 +7,7 @@ interface Env {
 interface UserContextData {
   user?: {
     username: string;
-    role: 'admin' | 'member';
+    role: 'admin' | 'member' | 'manager';
     exp: number;
   };
 }
@@ -48,9 +48,9 @@ export const onRequestPost: PagesFunction<Env, any, UserContextData> = async (co
   const accessDenied = verifyAdminAccess(data);
   if (accessDenied) return accessDenied;
 
-  let payload: { username?: string; password?: string; role?: 'admin' | 'member' };
+  let payload: { username?: string; password?: string; role?: 'admin' | 'member' | 'manager' };
   try {
-    payload = await request.json() as { username?: string; password?: string; role?: 'admin' | 'member' };
+    payload = await request.json() as { username?: string; password?: string; role?: 'admin' | 'member' | 'manager' };
   } catch (e) {
     return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
       status: 400,
@@ -74,7 +74,7 @@ export const onRequestPost: PagesFunction<Env, any, UserContextData> = async (co
     });
   }
 
-  if (role !== "admin" && role !== "member") {
+  if (role !== "admin" && role !== "member" && role !== "manager") {
     return new Response(JSON.stringify({ error: "Invalid role value" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
@@ -118,9 +118,9 @@ export const onRequestPut: PagesFunction<Env, any, UserContextData> = async (con
 
   const currentAdmin = data.user!.username;
 
-  let payload: { username?: string; password?: string; role?: 'admin' | 'member'; is_active?: number };
+  let payload: { username?: string; password?: string; role?: 'admin' | 'member' | 'manager'; is_active?: number };
   try {
-    payload = await request.json() as { username?: string; password?: string; role?: 'admin' | 'member'; is_active?: number };
+    payload = await request.json() as { username?: string; password?: string; role?: 'admin' | 'member' | 'manager'; is_active?: number };
   } catch (e) {
     return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
       status: 400,
@@ -168,7 +168,7 @@ export const onRequestPut: PagesFunction<Env, any, UserContextData> = async (con
   }
 
   if (role) {
-    if (role !== "admin" && role !== "member") {
+    if (role !== "admin" && role !== "member" && role !== "manager") {
       return new Response(JSON.stringify({ error: "Invalid role value" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },

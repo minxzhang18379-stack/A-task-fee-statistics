@@ -40,7 +40,7 @@ export default function SettingsPage() {
   // Form values
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newRole, setNewRole] = useState<"admin" | "member">("member");
+  const [newRole, setNewRole] = useState<"admin" | "member" | "manager">("member");
   
   const [resetUserTarget, setResetUserTarget] = useState("");
   const [resetNewPass, setResetNewPass] = useState("");
@@ -469,6 +469,7 @@ export default function SettingsPage() {
                           className="flex h-8 w-full rounded-md border border-input bg-card px-2 py-1 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold cursor-pointer"
                         >
                           <option value="member">{language === "zh" ? "普通摄影师 (Member)" : "Member"}</option>
+                          <option value="manager">{language === "zh" ? "数据管理 (Manager)" : "Data Manager"}</option>
                           <option value="admin">{language === "zh" ? "超级管理员 (Admin)" : "Admin"}</option>
                         </select>
                       </div>
@@ -553,9 +554,15 @@ export default function SettingsPage() {
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                                   u.role === "admin" 
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30" 
-                                    : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                                    : u.role === "manager"
+                                      ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+                                      : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
                                 }`}>
-                                  {u.role === "admin" ? "管理员 (Admin)" : "摄影师 (Member)"}
+                                  {u.role === "admin" 
+                                    ? (language === "zh" ? "管理员 (Admin)" : "Admin") 
+                                    : u.role === "manager"
+                                      ? (language === "zh" ? "数据管理 (Manager)" : "Data Manager")
+                                      : (language === "zh" ? "摄影师 (Member)" : "Member")}
                                 </span>
                               </td>
                               <td className="p-3">
@@ -617,63 +624,65 @@ export default function SettingsPage() {
             </Card>
           )}
 
-          {/* Database Maintenance and Clear Data */}
-          <Card className="border-border/80">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Database className="w-4 h-4 text-primary" />
-                {t("settings.cardDb.title")}
-              </CardTitle>
-              <CardDescription>{t("settings.cardDb.desc")}</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/80 text-xs font-semibold">
-                <span className="text-muted-foreground font-bold">{t("settings.cardDb.status")}</span>
-                <span className="text-primary">{dbStatus}</span>
-              </div>
+          {/* Database Maintenance and Clear Data (ADMIN ONLY!) */}
+          {userRole === 'admin' && (
+            <Card className="border-border/80">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Database className="w-4 h-4 text-primary" />
+                  {t("settings.cardDb.title")}
+                </CardTitle>
+                <CardDescription>{t("settings.cardDb.desc")}</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/80 text-xs font-semibold">
+                  <span className="text-muted-foreground font-bold">{t("settings.cardDb.status")}</span>
+                  <span className="text-primary">{dbStatus}</span>
+                </div>
 
-              <div className="border-t pt-4">
-                {!showClearConfirm ? (
-                  <Button
-                    variant="destructive"
-                    className="gap-2 cursor-pointer font-semibold"
-                    onClick={() => setShowClearConfirm(true)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    {t("settings.cardDb.btnClear")}
-                  </Button>
-                ) : (
-                  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 space-y-3">
-                    <div className="flex items-center gap-2 text-destructive font-bold text-sm">
-                      <ShieldAlert className="w-5 h-5 shrink-0" />
-                      {t("settings.cardDb.confirmTitle")}
+                <div className="border-t pt-4">
+                  {!showClearConfirm ? (
+                    <Button
+                      variant="destructive"
+                      className="gap-2 cursor-pointer font-semibold"
+                      onClick={() => setShowClearConfirm(true)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {t("settings.cardDb.btnClear")}
+                    </Button>
+                  ) : (
+                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 space-y-3">
+                      <div className="flex items-center gap-2 text-destructive font-bold text-sm">
+                        <ShieldAlert className="w-5 h-5 shrink-0" />
+                        {t("settings.cardDb.confirmTitle")}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {t("settings.cardDb.confirmDesc")}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="font-semibold cursor-pointer text-xs"
+                          onClick={handleClearDatabase}
+                        >
+                          {t("settings.cardDb.btnConfirm")}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="font-semibold cursor-pointer text-xs"
+                          onClick={() => setShowClearConfirm(false)}
+                        >
+                          {t("settings.cardDb.btnCancel")}
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {t("settings.cardDb.confirmDesc")}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="font-semibold cursor-pointer text-xs"
-                        onClick={handleClearDatabase}
-                      >
-                        {t("settings.cardDb.btnConfirm")}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="font-semibold cursor-pointer text-xs"
-                        onClick={() => setShowClearConfirm(false)}
-                      >
-                        {t("settings.cardDb.btnCancel")}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
