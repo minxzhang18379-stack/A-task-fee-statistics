@@ -504,145 +504,150 @@ export default function TasksPage() {
 
   const selectedCount = Object.keys(rowSelection).filter((k) => rowSelection[k]).length;
 
-  const columns = useMemo<ColumnDef<Task>[]>(() => [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <input
-          type="checkbox"
-          className="rounded border-input h-4 w-4 cursor-pointer accent-primary"
-          checked={table.getIsAllPageRowsSelected() || table.getIsAllRowsSelected()}
-          onChange={table.getToggleAllRowsSelectedHandler()}
-        />
-      ),
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          className="rounded border-input h-4 w-4 cursor-pointer accent-primary"
-          checked={row.getIsSelected()}
-          onChange={row.getToggleSelectedHandler()}
-        />
-      ),
-      size: 40,
-    },
-    {
-      accessorKey: "id",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() !== "desc")} className="px-0 font-semibold hover:bg-transparent gap-1">
-          {t("tasks.table.id")} <ArrowUpDown className="h-3 w-3" />
-        </Button>
-      ),
-      size: 60,
-    },
-    {
-      accessorKey: "title",
-      header: t("tasks.table.taskName"),
-      size: 200,
-      cell: ({ row }) => (
-        <span className="font-semibold text-foreground text-sm">{row.getValue("title")}</span>
-      ),
-    },
-    {
-      accessorKey: "photographer",
-      header: t("tasks.table.photographer"),
-      size: 130,
-      cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-muted text-xs font-semibold text-foreground">
-          <Camera className="h-3 w-3 text-muted-foreground" />
-          {row.getValue("photographer") || "-"}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "taskType",
-      header: t("tasks.table.taskType"),
-      size: 130,
-      cell: ({ row }) => {
-        const type = row.getValue("taskType") as string;
-        const isMajor = type === "重大";
-        const isMinor = type === "非重大";
-        const isCustom = type === "自定义";
-        
-        let displayType = t("tasks.table.uncategorized");
-        if (isMajor) displayType = t("tasks.table.majorBadge");
-        else if (isMinor) displayType = t("tasks.table.minorBadge");
-        else if (isCustom) displayType = t("tasks.table.customBadge");
-        else if (type) displayType = type;
+  const columns = useMemo<ColumnDef<Task>[]>(() => {
+    const cols: ColumnDef<Task>[] = [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <input
+            type="checkbox"
+            className="rounded border-input h-4 w-4 cursor-pointer accent-primary"
+            checked={table.getIsAllPageRowsSelected() || table.getIsAllRowsSelected()}
+            onChange={table.getToggleAllRowsSelectedHandler()}
+          />
+        ),
+        cell: ({ row }) => (
+          <input
+            type="checkbox"
+            className="rounded border-input h-4 w-4 cursor-pointer accent-primary"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+          />
+        ),
+        size: 40,
+      },
+      {
+        accessorKey: "id",
+        header: ({ column }) => (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() !== "desc")} className="px-0 font-semibold hover:bg-transparent gap-1">
+            {t("tasks.table.id")} <ArrowUpDown className="h-3 w-3" />
+          </Button>
+        ),
+        size: 60,
+      },
+      {
+        accessorKey: "title",
+        header: t("tasks.table.taskName"),
+        size: 200,
+        cell: ({ row }) => (
+          <span className="font-semibold text-foreground text-sm">{row.getValue("title")}</span>
+        ),
+      },
+      {
+        accessorKey: "photographer",
+        header: t("tasks.table.photographer"),
+        size: 130,
+        cell: ({ row }) => (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-muted text-xs font-semibold text-foreground">
+            <Camera className="h-3 w-3 text-muted-foreground" />
+            {row.getValue("photographer") || "-"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "taskType",
+        header: t("tasks.table.taskType"),
+        size: 130,
+        cell: ({ row }) => {
+          const type = row.getValue("taskType") as string;
+          const isMajor = type === "重大";
+          const isMinor = type === "非重大";
+          const isCustom = type === "自定义";
+          
+          let displayType = t("tasks.table.uncategorized");
+          if (isMajor) displayType = t("tasks.table.majorBadge");
+          else if (isMinor) displayType = t("tasks.table.minorBadge");
+          else if (isCustom) displayType = t("tasks.table.customBadge");
+          else if (type) displayType = type;
 
-        return (
-          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded border text-xs font-bold shadow-xs ${
-            isMajor 
-              ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30" 
-              : isCustom
-                ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
-                : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
-          }`}>
-            <Layers className="h-3 w-3" />
-            {displayType}
-          </span>
-        );
+          return (
+            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded border text-xs font-bold shadow-xs ${
+              isMajor 
+                ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30" 
+                : isCustom
+                  ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+                  : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+            }`}>
+              <Layers className="h-3 w-3" />
+              {displayType}
+            </span>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "taskDate",
-      header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() !== "desc")} className="px-0 font-semibold hover:bg-transparent gap-1">
-          {t("tasks.table.taskDate")} <ArrowUpDown className="h-3 w-3" />
-        </Button>
-      ),
-      size: 120,
-      cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-          <Calendar className="h-3 w-3" />
-          {row.getValue("taskDate") || "-"}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "fee",
-      header: t("tasks.table.fee"),
-      size: 120,
-      cell: ({ row }) => {
-        const val = Number(row.getValue("fee")) || 0;
-        return (
-          <span className="font-bold text-emerald-600 dark:text-emerald-400">
-            ¥{val.toFixed(2)}
+      {
+        accessorKey: "taskDate",
+        header: ({ column }) => (
+          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() !== "desc")} className="px-0 font-semibold hover:bg-transparent gap-1">
+            {t("tasks.table.taskDate")} <ArrowUpDown className="h-3 w-3" />
+          </Button>
+        ),
+        size: 120,
+        cell: ({ row }) => (
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Calendar className="h-3 w-3" />
+            {row.getValue("taskDate") || "-"}
           </span>
-        );
+        ),
       },
-    },
-    {
-      id: "actions",
-      header: t("tasks.table.actions"),
-      size: 120,
-      cell: ({ row }) => {
-        const task = row.original;
-        return (
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 px-2.5 text-xs transition-all border-primary/20 hover:bg-primary/5 hover:text-primary"
-              onClick={() => openEditDialog(task)}
-            >
-              <Edit className="h-3.5 w-3.5 mr-1" /> {t("tasks.table.btnEdit")}
-            </Button>
-            {userRole === 'admin' && (
+      {
+        accessorKey: "fee",
+        header: t("tasks.table.fee"),
+        size: 120,
+        cell: ({ row }) => {
+          const val = Number(row.getValue("fee")) || 0;
+          return (
+            <span className="font-bold text-emerald-600 dark:text-emerald-400">
+              ¥{val.toFixed(2)}
+            </span>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: t("tasks.table.actions"),
+        size: 120,
+        cell: ({ row }) => {
+          const task = row.original;
+          return (
+            <div className="flex items-center gap-1.5">
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                onClick={() => handleDeleteTask(task.id!)}
-                title={t("tasks.table.btnDelete")}
+                variant="outline"
+                size="sm"
+                className="h-8 px-2.5 text-xs transition-all border-primary/20 hover:bg-primary/5 hover:text-primary"
+                onClick={() => openEditDialog(task)}
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Edit className="h-3.5 w-3.5 mr-1" /> {t("tasks.table.btnEdit")}
               </Button>
-            )}
-          </div>
-        );
+              {userRole === 'admin' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleDeleteTask(task.id!)}
+                  title={t("tasks.table.btnDelete")}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+          );
+        },
       },
-    },
-  ], [openEditDialog, handleDeleteTask, t, language, userRole]);
+    ];
+    return userRole === 'admin'
+      ? cols
+      : cols.filter(c => c.id !== 'select' && c.id !== 'actions');
+  }, [openEditDialog, handleDeleteTask, t, language, userRole]);
 
   const table = useReactTable({
     data: filteredTasks,
@@ -692,11 +697,11 @@ export default function TasksPage() {
               <Button variant="outline" className="gap-2 cursor-pointer border-blue-300 bg-blue-50/50 text-blue-700 hover:bg-blue-100/60 dark:border-blue-950/40 dark:bg-blue-950/20 dark:text-blue-400 font-semibold" onClick={handleTxtImport}>
                 <FileText className="h-4 w-4" /> {t("tasks.importTxt")}
               </Button>
+              <Button className="gap-2 shadow-xs cursor-pointer font-bold" onClick={openAddDialog}>
+                <Plus className="h-4 w-4" /> {t("tasks.addTask")}
+              </Button>
             </>
           )}
-          <Button className="gap-2 shadow-xs cursor-pointer font-bold" onClick={openAddDialog}>
-            <Plus className="h-4 w-4" /> {t("tasks.addTask")}
-          </Button>
         </div>
       </div>
 

@@ -25,7 +25,19 @@ export const onRequestGet: PagesFunction<Env, any, UserContextData> = async (con
 
 // POST: Add a new task record
 export const onRequestPost: PagesFunction<Env, any, UserContextData> = async (context) => {
-  const { request, env } = context;
+  const { request, env, data } = context;
+  const user = data.user;
+
+  // Strict role checking: only admin is authorized to add tasks
+  if (!user || user.role !== "admin") {
+    return new Response(
+      JSON.stringify({ error: "Forbidden: Only Administrators are allowed to add tasks" }),
+      {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 
   const task = await request.json() as {
     title: string;
@@ -54,7 +66,19 @@ export const onRequestPost: PagesFunction<Env, any, UserContextData> = async (co
 
 // PUT: Update an existing task record
 export const onRequestPut: PagesFunction<Env, any, UserContextData> = async (context) => {
-  const { request, env } = context;
+  const { request, env, data } = context;
+  const user = data.user;
+
+  // Strict role checking: only admin is authorized to edit tasks
+  if (!user || user.role !== "admin") {
+    return new Response(
+      JSON.stringify({ error: "Forbidden: Only Administrators are allowed to edit tasks" }),
+      {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 
   const task = await request.json() as {
     id: number;
