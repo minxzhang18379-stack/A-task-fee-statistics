@@ -550,10 +550,10 @@ export default function SettingsPage() {
                                 )}
                               </td>
                               <td className="p-3">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                                   u.role === "admin" 
-                                    ? "bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-400" 
-                                    : "bg-blue-950/50 text-blue-400 border border-blue-900/40 dark:bg-blue-950/50 dark:text-blue-400"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30" 
+                                    : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
                                 }`}>
                                   {u.role === "admin" ? "管理员 (Admin)" : "摄影师 (Member)"}
                                 </span>
