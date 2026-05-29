@@ -182,7 +182,7 @@ export default function SettingsPage() {
     async function checkDb() {
       try {
         const { isTauri: checkTauri, initDb } = await import('@/lib/db');
-        if (checkTauri()) {
+        if (checkTauri) {
           await initDb();
           setDbStatus("已连接 SQLite 数据库 (Active)");
         } else {
@@ -218,7 +218,7 @@ export default function SettingsPage() {
   const handleClearDatabase = async () => {
     try {
       const { isTauri: checkTauri, initDb } = await import('@/lib/db');
-      if (checkTauri()) {
+      if (checkTauri) {
         // Tauri/SQLite environment
         const db = await initDb();
         if (db) {

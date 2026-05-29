@@ -817,7 +817,8 @@ export default function TasksPage() {
       </div>
 
       {/* Table */}
-      <Card className="border border-border/80 shadow-xs overflow-hidden bg-card">
+      {/* Table (Desktop View) */}
+      <Card className="hidden sm:block border border-border/80 shadow-xs overflow-hidden bg-card">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -858,6 +859,99 @@ export default function TasksPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Responsive Card List (Mobile View) */}
+      <div className="block sm:hidden space-y-4">
+        {displayedRows.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground bg-card border border-border/80 rounded-xl">
+            <div className="flex flex-col items-center justify-center gap-1.5">
+              <Info className="h-6 w-6 text-muted-foreground/60" />
+              <span>{t("tasks.table.noData")}</span>
+            </div>
+          </div>
+        ) : (
+          displayedRows.map((row) => {
+            const task = row.original;
+            return (
+              <div
+                key={row.id}
+                className={`relative p-4 rounded-xl border border-border/60 bg-card/60 backdrop-blur-md shadow-xs transition-all hover:bg-card/80 space-y-3 ${
+                  row.getIsSelected() ? "ring-1 ring-primary bg-primary/5" : ""
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    {userRole === 'admin' && (
+                      <input
+                        type="checkbox"
+                        className="rounded border-input h-4 w-4 cursor-pointer accent-primary shrink-0"
+                        checked={row.getIsSelected()}
+                        onChange={row.getToggleSelectedHandler()}
+                      />
+                    )}
+                    <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground shrink-0">
+                      #{task.id}
+                    </span>
+                    <h4 className="font-bold text-foreground text-sm leading-snug break-words">
+                      {task.title}
+                    </h4>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-bold shadow-xs ${
+                    task.taskType === "重大" 
+                      ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30" 
+                      : task.taskType === "自定义"
+                        ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+                        : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                  }`}>
+                    <Layers className="h-2.5 w-2.5" />
+                    {task.taskType === "重大" ? t("tasks.table.majorBadge") : task.taskType === "非重大" ? t("tasks.table.minorBadge") : task.taskType === "自定义" ? t("tasks.table.customBadge") : task.taskType}
+                  </span>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground pt-0.5">
+                  <span className="inline-flex items-center gap-1">
+                    <Camera className="h-3.5 w-3.5 text-primary/70" />
+                    <span className="font-semibold text-foreground/90">{task.photographer || "-"}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span>{task.taskDate || "-"}</span>
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[10px] text-muted-foreground">{t("tasks.table.fee")}:</span>
+                    <span className="font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
+                      ¥{Number(task.fee || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  {userRole === 'admin' && (
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2.5 text-xs transition-all border-primary/20 hover:bg-primary/5 hover:text-primary gap-1"
+                        onClick={() => openEditDialog(task)}
+                      >
+                        <Edit className="h-3 w-3" /> {t("tasks.table.btnEdit")}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteTask(task.id!)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
       
       <div className="pb-8" />
 
