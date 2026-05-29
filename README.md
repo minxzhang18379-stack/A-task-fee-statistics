@@ -226,7 +226,7 @@ npm run tauri dev
 npm run tauri build
 ```
 编译完成后，安装程序和免安装二进制文件将自动输出在：
-*   `src-tauri/target/release/bundle/nsis/PANN Task Manager_1.0.1_x64-setup.exe` (自动复制并同步至您的项目根目录下)
+*   `src-tauri/target/release/bundle/nsis/PANN Task Manager_1.1.0_x64-setup.exe` (自动复制并同步至您的项目根目录下)
 *   `src-tauri/target/release/tauri-app.exe` (自动重命名为 `PANN Task Manager.exe` 同步至根目录下)
 
 ---

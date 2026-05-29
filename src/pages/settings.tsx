@@ -186,8 +186,13 @@ export default function SettingsPage() {
           await initDb();
           setDbStatus("已连接 SQLite 数据库 (Active)");
         } else {
-          // Web environment: check D1 API connectivity
-          const response = await fetch('/api/tasks');
+          // Web environment: check D1 API connectivity (requires Bearer JWT)
+          const token = localStorage.getItem('pann_jwt_token') || '';
+          const response = await fetch('/api/tasks', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           if (response.ok) {
             setDbStatus("已连接 Cloudflare D1 数据库 (Active)");
           } else {
