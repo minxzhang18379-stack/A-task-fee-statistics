@@ -250,9 +250,9 @@ export default function SettingsPage() {
         <p className="text-muted-foreground text-sm mt-1">{t("settings.subtitle")}</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 items-start">
         {/* Left column: Quick Nav/Details */}
-        <div className="md:col-span-1 space-y-4">
+        <div className="md:col-span-1 space-y-4 md:sticky md:top-6 h-fit">
           <Card className="bg-card/50 backdrop-blur-xs border-border/80">
             <CardContent className="p-5 flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-2xl overflow-hidden mb-4 shadow-xs border bg-background flex items-center justify-center p-2 dark:bg-zinc-900">
