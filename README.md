@@ -18,17 +18,19 @@
     *   **桌面客户端 (Windows)**：基于 Tauri 2.x 原生编译，包体积极小（约 3.9MB 安装包），内存占用极低，集成系统原生通知与本地独立 SQLite。
     *   **Web 网页与移动端**：适配 iOS/Android 移动端屏幕，提供自适应侧边抽屉式导航与全面流畅的手势响应。
 *   **🔄 云端同步与离线降级双路由**：
-    *   **在线云端模式**：所有终端实时与 Cloudflare D1 边缘数据库同步，满足多人协同录入、实时统计与统计大屏共享的需求。
+    *   **在线云端模式**：所有终端实时与 Cloudflare D1 边缘数据库同步，满足多人协同录入、实时统计与统计大盘共享的需求。
     *   **离线单机模式**：Tauri 客户端在无网或未配服务器时，自动无缝切换至本地物理 SQLite 数据库（`tasks.db`）独立运行。
-*   **🔒 工业级 JWT 安全鉴权**：
-    *   **无感登录与 Token 过期机制**：移除明文密码存储的反安全模式，静态密码在验证后仅用于单次签发 12 小时有效期的 JWT 临时令牌。
-    *   **双角色双密码隔离模式**：
-        *   **管理员 (Admin)**：拥有完整的任务增删改查、Excel 模板导入、批量数据清洗与全库清空权限。
-        *   **普通成员 (Member)**：拥有添加任务、修改自己任务的录入权限。界面自动屏蔽删除控件、批量操作按钮以及设置管理页面，避免数据误删。
+*   **🔒 工业级加盐哈希与 JWT 动态鉴权**：
+    *   **动态多用户隔离**：彻底摆脱静态全局密码限制，支持为团队中无限个不同成员分配独立的用户名与密码。
+    *   **PBKDF2 金融级防爆破存储**：云端拒绝存储任何明文密码。密码在入库前自动由 Web Crypto 引擎结合随机盐（`salt`）进行 **100,000次 PBKDF2-SHA256 加盐迭代哈希运算**。
+    *   **无感登录与 Token 过期机制**：用户登录通过后，单次签发 12 小时有效期的临时 JWT 会话令牌。前端在 API 通信中仅传递该 JWT，在保障安全的同时实现 localStorage 零密码泄露。
+    *   **可视化“密码管理终端”与权限熔断**：
+        *   **管理员 (Admin)**：在【设置】页面独享“密码管理终端”卡片。支持动态添加用户账号、为遗忘密码的成员一键重置密码、以及一键“禁用/启用”账号（瞬时云端权限熔断）。
+        *   **普通成员 (Member)**：拥有数据录入与修改权限。登录后自动在前端物理隐藏全套删除控件、批量操作面板以及设置密码管理终端。
 *   **📊 强大的数据导入导出引擎**：
     *   **Excel 智能导入**：支持识别格式混乱的外部表格，智能提取“任务名称”、“拍摄人”、“任务类型”、“任务日期”与“稿费”等关键维度。
     *   **物理文本清洗规则 (DRY 业务服务)**：支持在入库前自动对拍摄人后缀（如“（修图）”、“(修图)”）和地点拆分规则进行规范化清洗，确保大盘统计维度绝对纯净。
-    *   **Excel 高级导出**：支持按照模板导出带有求和公式、边框样式及表头标题的专业稿费汇总单，并支持一键为特定摄影师生成个人对账单。
+    *   **Excel 高级导出**：支持按照模板导出带有求和公式、边框样式及表头标题之专业稿费汇总单，并支持一键为特定摄影师生成个人对账单。
 *   **🌗 现代玻璃拟态设计系统**：
     *   基于 Tailwind CSS + Shadcn UI 深度定制的暗黑玻璃透光美学，包含平滑的微动画悬浮反馈。
 
@@ -47,18 +49,21 @@ graph TD
     subgraph 服务端 (Cloudflare Serverless 边缘网络)
         CF_Gateway{CF _middleware.ts 拦截器}
         CF_Gateway -->|CORS 拦截 / 全局未捕获异常捕捉| CORS_Gate[跨域与异常处理器]
-        CF_Gateway -->|JWT 令牌解密与过期时间校验| Auth_Gate[鉴权拦截器]
+        CF_Gateway -->|JWT 令牌解密与状态拦截| Auth_Gate[鉴权拦截器]
         
         Auth_Gate -->|通过: 解析claims存入 context.data| Route_API[API 路由分配]
         
-        Route_API -->|/api/auth 登录| Auth_API[auth.ts 静态密码校验与JWT签发]
+        Route_API -->|POST /api/auth 登录| Auth_API[auth.ts 数据库校验与加盐比对]
         Route_API -->|/api/tasks 任务| Task_API[tasks.ts 任务 CRUD 极简控制器]
-        Route_API -->|/api/tasks/all 清除| Clear_API[tasks/all.ts 专用清库控制器]
+        Route_API -->|DELETE /api/tasks/all 清除| Clear_API[tasks/all.ts 专用清库控制器]
+        Route_API -->|/api/admin/users 账号| Admin_API[admin/users.ts 密码管理终端API]
     end
 
     subgraph 存储层 (边缘分布式 SQLite)
         Task_API -->|D1 API 查询| D1[(Cloudflare D1 SQLite 数据库)]
         Clear_API -->|D1 API 清空| D1
+        Auth_API -->|查询用户凭证| D1
+        Admin_API -->|CRUD 用户账户| D1
     end
 ```
 
@@ -71,15 +76,17 @@ f:\PANN\任务稿费统计/
 ├── functions/                  # Cloudflare Pages Serverless 后端 API
 │   ├── api/
 │   │   ├── _middleware.ts      # [核心] 全局中间件 (CORS 预检、JWT 拦截校验、全局 Try-Catch)
-│   │   ├── auth.ts             # 静态密码验证登录与签发 JWT 令牌
+│   │   ├── auth.ts             # 升级为 POST 登录，实现动态凭证校验与冷启动自愈
 │   │   ├── tasks.ts            # 任务增删改查路由 (直接受 JWT 保护，剥离 CORS)
 │   │   ├── tasks/
 │   │   │   └── all.ts          # 专属清空数据库接口 (仅管理员 JWT 可调用)
-│   │   └── jwt.ts              # [工具] 原生 Web Crypto API JWT 签名/验证类
+│   │   ├── admin/
+│   │   │   └── users.ts        # [新增] 密码终端账户管理接口 (超级管理员专享 CRUD)
+│   │   └── jwt.ts              # [工具] 原生 JWT 签名类与 PBKDF2 CryptoEngine 加密类
 ├── src/                        # 前端 React 源码
 │   ├── assets/                 # 静态图片资源 (Logo 等)
 │   ├── components/
-│   │   ├── login-gate.tsx      # 安全登录门禁 (包含云端 JWT 自动校验与本地单机切换)
+│   │   ├── login-gate.tsx      # 用户名+密码登录门禁 (包含 JWT 自动校验与本地单机切换)
 │   │   ├── layout.tsx          # 玻璃美学外壳 (集成自适应移动端 Hamburger 侧抽屉菜单)
 │   │   └── ui/                 # 基础原子化 UI 组件 (Shadcn UI / Tailwind)
 │   ├── lib/
@@ -89,7 +96,7 @@ f:\PANN\任务稿费统计/
 │   │   ├── dashboard.tsx       # 任务及稿费数据可视化主面板
 │   │   ├── tasks.tsx           # 任务列表与录入 (自动根据角色过滤删除/批量操作)
 │   │   ├── stats.tsx           # 每月稿费明细与摄影师统计大盘
-│   │   └── settings.tsx        # 系统设置 (模板样式定制、数据库维护及清空)
+│   │   └── settings.tsx        # 系统设置 (新增可视化“密码管理终端”管理特权卡片)
 │   ├── App.tsx                 # 主入口 (封装门禁与全局路由)
 │   └── index.css               # 主样式系统设计 (CSS Tokens)
 ├── src-tauri/                  # Tauri 2.x 桌面原生配置与 Rust 核心代码
@@ -103,10 +110,10 @@ f:\PANN\任务稿费统计/
 
 ## 💾 数据库表结构设计 (schema.sql)
 
-系统采用单表结构设计，在保证极高运行性能的同时，通过严格的索引与清洗机制确保数据结构稳定：
+系统数据库包含任务记录表 `TaskRecord` 与用户凭证表 `UserCredential`：
 
 ```sql
--- 任务及稿费记录主表
+-- 1. 任务及稿费记录表
 CREATE TABLE IF NOT EXISTS TaskRecord (
   id INTEGER PRIMARY KEY AUTOINCREMENT,      -- 自增主键 ID
   title TEXT NOT NULL,                        -- 任务/项目名称 (入库自动剔除地点后缀)
@@ -116,7 +123,18 @@ CREATE TABLE IF NOT EXISTS TaskRecord (
   fee REAL NOT NULL DEFAULT 0                -- 稿费金额 (浮点型数)
 );
 
--- 为高频统计维度建立覆盖索引，大幅提高大盘渲染速度
+-- 2. 用户凭证与权限角色表
+CREATE TABLE IF NOT EXISTS UserCredential (
+  username TEXT PRIMARY KEY,                  -- 用户名 (唯一主键)
+  password_hash TEXT NOT NULL,                -- 经过加盐哈希加密后的密码密文 (PBKDF2/SHA-256)
+  salt TEXT NOT NULL,                         -- 随机生成的加密盐值，防彩虹表破解
+  role TEXT NOT NULL DEFAULT 'member',        -- 权限角色: 'admin' (管理员) 或 'member' (成员)
+  created_at INTEGER NOT NULL,                -- 账号创建时间戳
+  is_active INTEGER NOT NULL DEFAULT 1        -- 账号状态: 1 (启用), 0 (禁用)
+);
+
+-- 建立覆盖索引，大幅提升大盘渲染速度与鉴权过滤效率
+CREATE INDEX IF NOT EXISTS idx_user_status ON UserCredential(username, is_active);
 CREATE INDEX IF NOT EXISTS idx_task_date ON TaskRecord(taskDate);
 CREATE INDEX IF NOT EXISTS idx_photographer ON TaskRecord(photographer);
 ```
@@ -160,11 +178,11 @@ npm run tauri dev
 
 本系统可以完全托管在 Cloudflare 平台，实现全网极速低延迟部署与接近**永久免费**的日常开销。
 
-### 第一步：创建并运行 D1 数据库
+### 第一步：创建并初始化 D1 数据库
 1.  登录您的 [Cloudflare 控制台](https://dash.cloudflare.com/)。
 2.  在左侧导航栏选择 **Workers & Pages > D1**，点击 **Create database**，创建一个名为 `pann-tasks-db` 的数据库。
 3.  数据库创建成功后，进入其详情页，点击右上角的 **Console** (SQL 终端)。
-4.  将本项目根目录下的 [schema.sql](file:///f:/PANN/任务稿费统计/schema.sql) 文件内容完整复制到 Console 中并点击 **Execute** 运行，完成数据表及索引的创建。
+4.  将本项目根目录下的 [schema.sql](file:///f:/PANN/任务稿费统计/schema.sql) 文件中的数据表与索引建表 SQL 完整复制到 Console 中并点击 **Execute** 运行，完成数据表初始化。
 
 ### 第二步：部署 Cloudflare Pages
 1.  将您的本地代码推送至您的私有 GitHub 仓库。
@@ -185,16 +203,23 @@ npm run tauri dev
 2.  **配置系统安全密钥 (Environment variables)**：
     *   点击 **Settings > Environment variables**。
     *   添加如下变量值：
-        *   `API_PASSWORD`：管理员密码 (用于签发 admin 令牌，如不设置默认为 `admin123`)。
-        *   `MEMBER_PASSWORD`：普通成员密码 (用于签发 member 限制权限令牌，如不设置默认为 `member123`)。
-        *   `JWT_SECRET`：**【强烈建议配置】** 足够长且随机的强密钥串，用于服务端对 JWT 会话安全签名。
-3.  保存配置后，在 **Deployments** 页面选择最新一次部署，点击 **Retry deployment** (重新部署) 以激活上述绑定。
+        *   `API_PASSWORD`：管理员初始化密码 (如果不配，默认冷启动密码为 `admin123`)。
+        *   `MEMBER_PASSWORD`：普通成员初始化密码 (如果不配，默认冷启动密码为 `member123`)。
+        *   `JWT_SECRET`：**【强烈建议配置】** 足够长且随机的强密钥串，用于服务端对 JWT 会话进行不可逆加密签名。
+3.  保存配置后，在 **Deployments** 页面选择最新一次部署，点击 **Manage deployment > Redeploy** 重新部署以激活上述绑定。
+
+### 🌟 首次登录自动冷启动初始化 (自愈上线)
+由于初次部署时用户表完全为空，系统会自动拦截并执行“自愈自建”冷启动：
+1.  使用最新版客户端，连接您的云端域名。
+2.  **用户名** 输入 `admin`。
+3.  **访问密码** 输入您在 Cloudflare 环境变量中配置的 `API_PASSWORD`。
+4.  点击登录。系统通过匹配环境校验，并在通过的瞬间**自动在云端 UserCredential 表中写入加盐加密过的 `admin` 与 `member` 默认账户记录**。此后，您就可以安全地在系统【设置】页面中动态管理、新增团队账号和密码了！
 
 ---
 
 ## 📦 Tauri 桌面客户端编译发布
 
-如果您对前端代码进行了任何定制（如修改了默认服务器地址等），或者同步了上述重构升级，需要重新编译生成 Windows 原生软件：
+如果您对前端代码进行了任何定制，或者同步了上述重构升级，需要重新编译生成 Windows 原生软件：
 
 ```bash
 # 启动 Tauri 高级自动打包构建

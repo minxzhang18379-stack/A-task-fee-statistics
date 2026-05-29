@@ -122,3 +122,40 @@ export class SimpleJWT {
     }
   }
 }
+
+// --- PBKDF2 Cryptographic Hashing Engine (SHA-256 with 100,000 iterations) ---
+// Securely salts and hashes dynamic user passwords.
+export class CryptoEngine {
+  // Generate a random 32-character hexadecimal salt string
+  static generateSalt(): string {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Derive salted hash bits from raw password using PBKDF2 iterations
+  static async hashPassword(password: string, salt: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const passwordKey = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      { name: "PBKDF2" },
+      false,
+      ["deriveBits"]
+    );
+
+    const derivedBits = await crypto.subtle.deriveBits(
+      {
+        name: "PBKDF2",
+        salt: encoder.encode(salt),
+        iterations: 100000, // 100k standard iterations
+        hash: "SHA-256"
+      },
+      passwordKey,
+      256 // derived key length in bits
+    );
+
+    return Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+}
+

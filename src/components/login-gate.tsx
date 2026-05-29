@@ -17,6 +17,7 @@ export function LoginGate({ children }: LoginGateProps) {
   // Login form states
   const [mode, setMode] = useState<"cloud" | "local">("cloud");
   const [serverUrl, setServerUrl] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   useEffect(() => {
@@ -79,14 +80,15 @@ export function LoginGate({ children }: LoginGateProps) {
     }
   };
 
-  const validateCredentials = async (url: string, pass: string): Promise<{ token: string; role: 'admin' | 'member' } | null> => {
+  const validateCredentials = async (url: string, user: string, pass: string): Promise<{ token: string; role: 'admin' | 'member' } | null> => {
     try {
       const cleanUrl = url.replace(/\/$/, "");
       const res = await fetch(`${cleanUrl}/api/auth`, {
-        method: "GET",
+        method: "POST",
         headers: {
-          "Authorization": `Bearer ${pass}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ username: user, password: pass }),
       });
 
       if (res.status === 200) {
@@ -128,6 +130,12 @@ export function LoginGate({ children }: LoginGateProps) {
       return;
     }
 
+    if (!username && mode === "cloud") {
+      setAuthError("请输入用户名");
+      setLoading(false);
+      return;
+    }
+
     if (!password) {
       setAuthError("请输入访问密码");
       setLoading(false);
@@ -136,7 +144,7 @@ export function LoginGate({ children }: LoginGateProps) {
 
     try {
       const cleanServer = targetServer.replace(/\/$/, "");
-      const authData = await validateCredentials(cleanServer, password);
+      const authData = await validateCredentials(cleanServer, username, password);
 
       if (authData) {
         localStorage.setItem("pann_db_mode", "cloud");
@@ -146,7 +154,7 @@ export function LoginGate({ children }: LoginGateProps) {
         localStorage.setItem("pann_authenticated", "true");
         setIsAuthenticated(true);
       } else {
-        setAuthError("密码错误或服务器拒绝访问");
+        setAuthError("用户名或密码错误");
       }
     } catch (err) {
       console.error(err);
@@ -257,6 +265,19 @@ export function LoginGate({ children }: LoginGateProps) {
                   </div>
                 )}
 
+                {/* Username Input */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="username" className="text-xs text-zinc-300">用户名</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="管理员(admin) 或 成员名"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-sm h-10 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-0"
+                  />
+                </div>
+
                 {/* Password Input */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
@@ -265,7 +286,7 @@ export function LoginGate({ children }: LoginGateProps) {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="输入管理密码"
+                    placeholder="输入访问密码"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-sm h-10 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-0"
