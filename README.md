@@ -40,13 +40,13 @@
 
 ```mermaid
 graph TD
-    subgraph 客户端层 (多端适配)
+    subgraph ClientLayer ["客户端层 (多端适配)"]
         WebClient[Web网页/手机端浏览器] -->|标准 HTTPS 请求| CF_Gateway
         TauriClient[Tauri 桌面端 .exe] -->|API 请求 (携带 JWT)| CF_Gateway
         TauriClient -.->|无网状态下自动降级| LocalSQLite[(本地物理 SQLite tasks.db)]
     end
 
-    subgraph 服务端 (Cloudflare Serverless 边缘网络)
+    subgraph ServerLayer ["服务端 (Cloudflare Serverless 边缘网络)"]
         CF_Gateway{CF _middleware.ts 拦截器}
         CF_Gateway -->|CORS 拦截 / 全局未捕获异常捕捉| CORS_Gate[跨域与异常处理器]
         CF_Gateway -->|JWT 令牌解密与状态拦截| Auth_Gate[鉴权拦截器]
@@ -59,7 +59,7 @@ graph TD
         Route_API -->|/api/admin/users 账号| Admin_API[admin/users.ts 密码管理终端API]
     end
 
-    subgraph 存储层 (边缘分布式 SQLite)
+    subgraph StorageLayer ["存储层 (边缘分布式 SQLite)"]
         Task_API -->|D1 API 查询| D1[(Cloudflare D1 SQLite 数据库)]
         Clear_API -->|D1 API 清空| D1
         Auth_API -->|查询用户凭证| D1
