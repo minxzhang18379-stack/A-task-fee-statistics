@@ -403,7 +403,7 @@ export default function SettingsPage() {
 
           {/* Password and Credential Management Terminal Card (ADMIN ONLY IN CLOUD MODE) */}
           {showConsole && (
-            <Card className="border-border/80 bg-zinc-900/50 backdrop-blur-md transition-all duration-300">
+            <Card className="border-border/80 transition-all duration-300">
               <CardHeader className="pb-4">
                 <CardTitle className="text-base flex items-center justify-between">
                   <span className="flex items-center gap-2">
@@ -433,8 +433,8 @@ export default function SettingsPage() {
                 
                 {/* 1. Add User Form Modal Panel */}
                 {showAddUser && (
-                  <form onSubmit={handleAddUser} className="p-4 rounded-lg bg-zinc-950/60 border border-zinc-800 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <h4 className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider">
+                  <form onSubmit={handleAddUser} className="p-4 rounded-lg bg-muted/40 border border-border space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider">
                       <UserPlus className="w-3.5 h-3.5" />
                       {language === "zh" ? "创建新用户" : "Create New User"}
                     </h4>
@@ -486,8 +486,8 @@ export default function SettingsPage() {
 
                 {/* 2. Reset Password Modal Panel */}
                 {showResetPass && (
-                  <form onSubmit={handleResetPassword} className="p-4 rounded-lg bg-zinc-950/60 border border-zinc-800 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <h4 className="text-xs font-bold text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
+                  <form onSubmit={handleResetPassword} className="p-4 rounded-lg bg-muted/40 border border-border space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
                       <KeyRound className="w-3.5 h-3.5" />
                       {language === "zh" ? `重置用户 [${resetUserTarget}] 密码` : `Reset Password for [${resetUserTarget}]`}
                     </h4>
@@ -526,9 +526,9 @@ export default function SettingsPage() {
                     {userError}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950/25">
-                    <table className="w-full border-collapse text-left text-xs text-zinc-300">
-                      <thead className="bg-zinc-900/50 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-zinc-800">
+                  <div className="overflow-x-auto rounded-lg border border-border bg-card/25">
+                    <table className="w-full border-collapse text-left text-xs text-foreground">
+                      <thead className="bg-muted/40 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border">
                         <tr>
                           <th className="p-3 pl-4">{language === "zh" ? "用户名" : "Username"}</th>
                           <th className="p-3">{language === "zh" ? "角色权限" : "Role"}</th>
@@ -536,15 +536,15 @@ export default function SettingsPage() {
                           <th className="p-3 pr-4 text-right">{language === "zh" ? "控制管理" : "Actions"}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-850 font-semibold">
+                      <tbody className="divide-y divide-border font-semibold">
                         {users.map((u) => {
                           const isSelf = u.username === activeUser;
                           return (
-                            <tr key={u.username} className="hover:bg-zinc-900/20 transition-colors">
+                            <tr key={u.username} className="hover:bg-muted/30 transition-colors">
                               <td className="p-3 pl-4 font-bold flex items-center gap-1.5">
-                                <span className="text-zinc-100">{u.username}</span>
+                                <span>{u.username}</span>
                                 {isSelf && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 font-semibold">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground font-semibold">
                                     {language === "zh" ? "我" : "Self"}
                                   </span>
                                 )}
@@ -552,8 +552,8 @@ export default function SettingsPage() {
                               <td className="p-3">
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] ${
                                   u.role === "admin" 
-                                    ? "bg-emerald-950/50 text-emerald-400 border border-emerald-900/40" 
-                                    : "bg-blue-950/50 text-blue-400 border border-blue-900/40"
+                                    ? "bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-400" 
+                                    : "bg-blue-950/50 text-blue-400 border border-blue-900/40 dark:bg-blue-950/50 dark:text-blue-400"
                                 }`}>
                                   {u.role === "admin" ? "管理员 (Admin)" : "摄影师 (Member)"}
                                 </span>

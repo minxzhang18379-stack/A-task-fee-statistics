@@ -628,8 +628,8 @@ export default function StatsPage() {
                                   <td className="py-2 px-3">
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
                                       task.taskType === "重大" 
-                                        ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400" 
-                                        : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400"
+                                        ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30" 
+                                        : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
                                     }`}>
                                       {task.taskType === "重大" ? t("tasks.table.majorBadge") : task.taskType === "非重大" ? t("tasks.table.minorBadge") : t("tasks.table.customBadge")}
                                     </span>
