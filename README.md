@@ -35,7 +35,12 @@
 *   **🌗 现代玻璃拟态与极客双语排版系统**：
     *   **超感玻璃卡片质感**：基于 Tailwind CSS + Shadcn UI 深度定制的暗黑玻璃透光美学，在 v1.1.2 中深度重构 `.bg-card`，将背景模糊提升至 `blur(20px)`，在亮色模式下融入 slate-200 描边，使毛玻璃卡片拥有真实厚重的高级透光折射感。
     *   **IBM Plex Sans 双语排版**：引入 Google Fonts 预连接并配置 **IBM Plex 无衬线双语排版系统**。英文与数字优先渲染为极简精细的 `IBM Plex Sans`（长串对账金额排列极为整齐），中文回落至 `IBM Plex Sans SC`（简体中文），大幅优化视觉体验。
-    *   **移动端自适应重构**：彻底重构【设置面板】与【数据统计面板】在移动端小屏下的响应式体验。表单自适应垂直叠层，用户列表新增**自适应玻璃卡片列表** (`block sm:hidden`)；同时将每周任务、月份指标、摄影师月度稿费完全重构为**响应式 Bento 药丸卡片与 2×2 卡片网格**，彻底解决移动设备下列宽拥挤、文字被迫截断、报表导出按钮被严重挤压等痛点。
+    *   **移动端自适应重构 (v1.1.2 Premium 级响应式优化)**：彻底解决移动端小屏幕下列宽受限、文字被迫换行、数据列堆叠截断、以及报表导出按钮严重挤压的体验痛点。
+        *   **【系统设置】自适应重构**：表单在小屏下从原本的 3 列强行网格自动转换为单列自适应纵向排布 (`grid-cols-1 sm:grid-cols-3`)；用户账号表格彻底隐退，自动替换为**极简自适应玻璃卡片账户列表** (`block sm:hidden`)，以圆形的启用/禁用及密码重置玻璃按钮保证全屏触控顺滑。
+        *   **【数据统计】Bento 微件化重构 (`stats.tsx`)**：
+            1.  **每周任务统计**：在移动端抛弃扁平 Row Flex 结构，头部周区间与 Chevron 折叠箭头两端对齐，下方采用双列 **Bento-style 玻璃药丸微件网格**（左列 `FileText` 任务数，右列 `YuanIcon` 总支出），底部配备 100% 全宽大面积圆角导出按钮，极致防误触。点击展开周明细后，内嵌 Table 自适应转换为磨砂微型任务卡片栈，每个任务项均配备独立的 Camera（拍摄人）与 Calendar（日期）双列 Bento 水平小药丸。
+            2.  **每月任务统计**：小屏下彻底隐藏表格，封装为月份卡片序列，内置四色 **2×2 四宫格自适应 Bento 数据板**：总任务（`Briefcase`，深海蓝）、计发稿费（`YuanIcon`，翡翠绿）、重大任务（`Layers`，玫瑰红）以及非重大任务（`FileText`，灰蓝）。
+            3.  **摄影师月度稿费统计**：隐退长表格，转换为精美排行卡片列表。首三名独享 🥇、🥈、🥉 等尊贵奖牌微章，右上角以高亮翡翠绿大字突出应得总稿费。卡片底部并排两个 Bento 小药丸：参与任务数（`Briefcase`）与**稿费占比（`PieChart` 饼图图标，完美替换原有的易误导之趋势箭头）**，直观传达静态比例关系。
 
 ---
 
@@ -57,9 +62,9 @@ graph TD
         Auth_Gate -->|"通过: 解析 claims 存入 context.data"| Route_API["API 路由分配"]
         
         Route_API -->|"POST /api/auth 登录"| Auth_API["auth.ts 数据库校验与加盐比对"]
-        Route_API -->|"/api/tasks 任务"| Task_API["tasks.ts 任务 CRUD 极简控制器"]
-        Route_API -->|"DELETE /api/tasks/all 清除"| Clear_API["tasks/all.ts 专用清库控制器"]
-        Route_API -->|"/api/admin/users 账号"| Admin_API["admin/users.ts 密码管理终端 API"]
+        Route_API -->|"/api/tasks 任务 CRUD"| Task_API["tasks.ts (Admin & Manager 放行, Member 阻断)"]
+        Route_API -->|"DELETE /api/tasks/all 清除"| Clear_API["tasks/all.ts (仅限 Admin 专享)"]
+        Route_API -->|"/api/admin/users 账号"| Admin_API["admin/users.ts 密码终端 API (仅限 Admin 专享)"]
     end
 
     subgraph StorageLayer ["存储层 (边缘分布式 SQLite)"]
