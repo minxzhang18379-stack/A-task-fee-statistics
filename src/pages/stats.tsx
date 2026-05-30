@@ -12,7 +12,8 @@ import {
   Camera,
   FileText,
   Layers,
-  Briefcase
+  Briefcase,
+  PieChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -454,7 +455,7 @@ export default function StatsPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-violet-500/5 dark:bg-violet-500/10 border border-violet-500/10 text-xs">
-                          <TrendingUp className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+                          <PieChart className="h-3.5 w-3.5 text-violet-500 shrink-0" />
                           <span className="font-semibold text-foreground/90">
                             {photographerStats.totalMonthlyFees > 0 ? ((item.feeSum / photographerStats.totalMonthlyFees) * 100).toFixed(1) : "0.0"}%
                           </span>
