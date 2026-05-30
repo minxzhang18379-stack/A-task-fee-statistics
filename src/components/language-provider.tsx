@@ -194,8 +194,8 @@ const translations: Record<Language, Record<string, any>> = {
       cardAbout: {
         author: "作者：张铭轩",
         version: "版本：v0.8.0 (Desktop Native)",
-        versionCurrent: "版本：v1.1.1 (Desktop Native)",
-        updateDate: "更新日期：2026年05月28日",
+        versionCurrent: "版本：v1.1.2 (Desktop Native)",
+        updateDate: "更新日期：2026年05月30日",
         statusOk: "系统运行状态良好"
       },
       cardHelp: {
@@ -419,8 +419,8 @@ const translations: Record<Language, Record<string, any>> = {
       cardAbout: {
         author: "Author: Zhang Mingxuan",
         version: "Version: v0.8.0 (Desktop Native)",
-        versionCurrent: "Version: v1.1.1 (Desktop Native)",
-        updateDate: "Updated: 2026-05-28",
+        versionCurrent: "Version: v1.1.2 (Desktop Native)",
+        updateDate: "Updated: 2026-05-30",
         statusOk: "System status: Healthy"
       },
       cardHelp: {
