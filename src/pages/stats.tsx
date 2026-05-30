@@ -376,7 +376,8 @@ export default function StatsPage() {
               )}
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full border-collapse text-left text-xs">
                   <thead>
                     <tr className="bg-muted/10 border-b font-semibold text-muted-foreground">
@@ -422,6 +423,50 @@ export default function StatsPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Bento Glass Cards View */}
+              <div className="block md:hidden divide-y divide-border/50">
+                {photographerStats.list.length > 0 ? (
+                  photographerStats.list.map((item, index) => (
+                    <div key={item.name} className="p-4 flex flex-col gap-3 hover:bg-muted/10 transition-colors">
+                      {/* Rank, Name and Total Payout */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-extrabold text-muted-foreground">
+                            {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                          </span>
+                          <span className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                            <Camera className="w-3.5 h-3.5 text-primary shrink-0" />
+                            {item.name}
+                          </span>
+                        </div>
+                        <span className="font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
+                          ¥{item.feeSum.toFixed(2)}
+                        </span>
+                      </div>
+                      {/* Bento Cards (Task Count and Percentage Ratio) */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/10 text-xs">
+                          <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="font-semibold text-foreground/90">
+                            {item.taskCount} {language === "zh" ? "次" : "times"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-violet-500/5 dark:bg-violet-500/10 border border-violet-500/10 text-xs">
+                          <TrendingUp className="h-3.5 w-3.5 text-violet-500 shrink-0" />
+                          <span className="font-semibold text-foreground/90">
+                            {photographerStats.totalMonthlyFees > 0 ? ((item.feeSum / photographerStats.totalMonthlyFees) * 100).toFixed(1) : "0.0"}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground font-semibold text-xs">
+                    {t("stats.tablePhotographer.noData")}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -484,7 +529,8 @@ export default function StatsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              {/* Desktop View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full border-collapse text-left text-xs">
                   <thead>
                     <tr className="bg-muted/10 border-b font-semibold text-muted-foreground">
@@ -528,6 +574,55 @@ export default function StatsPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Bento Grid View */}
+              <div className="block md:hidden divide-y divide-border/50">
+                {monthlyStats.length > 0 ? (
+                  monthlyStats.map((item) => (
+                    <div key={item.month} className="p-4 flex flex-col gap-3 hover:bg-muted/10 transition-colors">
+                      {/* Month Title */}
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-primary shrink-0" />
+                        <span className="font-bold text-sm text-foreground">{item.month}</span>
+                      </div>
+                      {/* 4-cell Bento Grid */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 text-xs">
+                          <Briefcase className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                          <span className="font-semibold text-foreground/90">
+                            {language === "zh" ? "总任务: " : "Total: "}
+                            {item.totalTasks} {language === "zh" ? "个" : "pcs"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 text-xs">
+                          <YuanIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                          <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                            ¥{item.feeSum.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/10 text-xs">
+                          <Layers className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                          <span className="font-semibold text-rose-600 dark:text-rose-400">
+                            {language === "zh" ? "重大: " : "Major: "}
+                            {item.majorCount} {language === "zh" ? "个" : "pcs"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-500/5 dark:bg-slate-500/10 border border-slate-500/10 text-xs">
+                          <FileText className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                          <span className="font-semibold text-muted-foreground">
+                            {language === "zh" ? "非重大: " : "Minor: "}
+                            {item.nonMajorCount} {language === "zh" ? "个" : "pcs"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground font-semibold text-xs">
+                    {t("stats.tableMonth.noData")}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -560,10 +655,10 @@ export default function StatsPage() {
                     key={week.weekKey}
                     className="border border-border/80 rounded-lg overflow-hidden bg-card shadow-xs transition-all duration-200"
                   >
-                    {/* Header */}
-                    <div className="flex items-center justify-between p-4 bg-muted/10 border-b border-border/50 gap-4">
+                    {/* Desktop/Tablet Header */}
+                    <div className="hidden sm:flex items-center justify-between p-4 bg-muted/10 border-b border-border/50 gap-4">
                       {/* Week Title & Stats */}
-                      <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                      <div className="flex-1 flex flex-row items-center gap-6">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-primary shrink-0" />
                           <span className="font-bold text-sm text-foreground">{week.weekKey}</span>
@@ -601,10 +696,59 @@ export default function StatsPage() {
                       </div>
                     </div>
 
+                    {/* Mobile Header (Vertical & Bento) */}
+                    <div className="flex sm:hidden flex-col p-4 bg-muted/10 border-b border-border/50 gap-3">
+                      {/* Row 1: Title & Toggle */}
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-primary shrink-0" />
+                          <span className="font-bold text-sm text-foreground">{week.weekKey}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-md hover:bg-muted shrink-0"
+                          onClick={() => toggleWeekExpand(week.weekKey)}
+                        >
+                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                      
+                      {/* Row 2: Bento Grid */}
+                      <div className="grid grid-cols-2 gap-2 w-full">
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/10 text-xs">
+                          <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="font-semibold text-foreground/90">
+                            {language === "zh" ? "任务: " : "Tasks: "}
+                            {week.totalTasks} {language === "zh" ? "个" : "pcs"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 text-xs">
+                          <YuanIcon className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                          <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                            ¥{week.totalFees.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Row 3: Action Buttons */}
+                      <div className="w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full h-9 text-xs text-emerald-700 border-emerald-300 bg-emerald-50/50 hover:bg-emerald-100/60 dark:border-emerald-950/50 dark:bg-emerald-950/20 dark:text-emerald-400 gap-1.5 cursor-pointer justify-center"
+                          onClick={() => handleWeeklyExport(week.tasks, week.startDate, week.endDate)}
+                        >
+                          <Download className="w-3.5 h-3.5" /> {t("stats.tableWeek.exportBtn")}
+                        </Button>
+                      </div>
+                    </div>
+
                     {/* Expand Detail List */}
                     {isExpanded && (
                       <div className="border-t bg-muted/10 p-4 animate-in slide-in-from-top-1 duration-150">
-                        <div className="overflow-x-auto rounded-md border border-border bg-card">
+                        {/* Desktop View */}
+                        <div className="hidden md:block overflow-x-auto rounded-md border border-border bg-card">
                           <table className="w-full border-collapse text-left text-xs">
                             <thead>
                               <tr className="bg-muted/40 border-b font-semibold text-muted-foreground">
@@ -641,6 +785,52 @@ export default function StatsPage() {
                               ))}
                             </tbody>
                           </table>
+                        </div>
+
+                        {/* Mobile View */}
+                        <div className="block md:hidden space-y-3">
+                          {week.tasks.map((task) => (
+                            <div key={task.id} className="p-3 bg-card border border-border/60 rounded-lg flex flex-col gap-2.5 shadow-xs">
+                              {/* Title & Type Badge */}
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-muted text-muted-foreground shrink-0">
+                                    #{task.id}
+                                  </span>
+                                  <h4 className="font-bold text-foreground text-xs leading-snug break-words truncate">
+                                    {task.title}
+                                  </h4>
+                                </div>
+                                <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded border text-[9px] font-bold ${
+                                  task.taskType === "重大" 
+                                    ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30" 
+                                    : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                                }`}>
+                                  {task.taskType === "重大" ? t("tasks.table.majorBadge") : task.taskType === "非重大" ? t("tasks.table.minorBadge") : t("tasks.table.customBadge")}
+                                </span>
+                              </div>
+                              
+                              {/* Photographer & Date Widgets */}
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-primary/5 dark:bg-primary/10 border border-primary/10 text-[11px] min-w-0">
+                                  <Camera className="h-3 w-3 text-primary shrink-0" />
+                                  <span className="truncate font-semibold text-foreground/90" title={task.photographer}>{task.photographer || "-"}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-muted/40 border border-border/40 text-[11px] min-w-0">
+                                  <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
+                                  <span className="truncate font-medium text-muted-foreground" title={task.taskDate}>{task.taskDate || "-"}</span>
+                                </div>
+                              </div>
+
+                              {/* Fee */}
+                              <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                                <span className="text-[10px] text-muted-foreground">{t("stats.tableWeek.detailFee")}:</span>
+                                <span className="font-extrabold text-sm text-emerald-600 dark:text-emerald-400">
+                                  ¥{(task.fee || 0).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
