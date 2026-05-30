@@ -909,15 +909,16 @@ export default function TasksPage() {
                   </span>
                 </div>
                 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground pt-0.5">
-                  <span className="inline-flex items-center gap-1">
-                    <Camera className="h-3.5 w-3.5 text-primary/70" />
-                    <span className="font-semibold text-foreground/90">{task.photographer || "-"}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>{task.taskDate || "-"}</span>
-                  </span>
+                {/* Bento-style Premium Glass Pill Widgets */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/10 text-xs">
+                    <Camera className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="truncate font-semibold text-foreground/90" title={task.photographer}>{task.photographer || "-"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-xs">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate font-medium text-muted-foreground" title={task.taskDate}>{task.taskDate || "-"}</span>
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between pt-2 border-t border-border/40">
