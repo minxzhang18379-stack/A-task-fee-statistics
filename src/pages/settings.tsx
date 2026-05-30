@@ -438,7 +438,7 @@ export default function SettingsPage() {
                       <UserPlus className="w-3.5 h-3.5" />
                       {language === "zh" ? "创建新用户" : "Create New User"}
                     </h4>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1">
                         <label className="text-[10px] text-muted-foreground font-bold">{language === "zh" ? "用户名" : "Username"}</label>
                         <input
@@ -527,62 +527,156 @@ export default function SettingsPage() {
                     {userError}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-lg border border-border bg-card/25">
-                    <table className="w-full border-collapse text-left text-xs text-foreground">
-                      <thead className="bg-muted/40 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border">
-                        <tr>
-                          <th className="p-3 pl-4">{language === "zh" ? "用户名" : "Username"}</th>
-                          <th className="p-3">{language === "zh" ? "角色权限" : "Role"}</th>
-                          <th className="p-3">{language === "zh" ? "账号状态" : "Status"}</th>
-                          <th className="p-3 pr-4 text-right">{language === "zh" ? "控制管理" : "Actions"}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border font-semibold">
-                        {users.map((u) => {
-                          const isSelf = u.username === activeUser;
-                          return (
-                            <tr key={u.username} className="hover:bg-muted/30 transition-colors">
-                              <td className="p-3 pl-4 font-bold flex items-center gap-1.5">
-                                <span>{u.username}</span>
+                  <>
+                    {/* Desktop View Table */}
+                    <div className="hidden sm:block overflow-x-auto rounded-lg border border-border bg-card/25">
+                      <table className="w-full border-collapse text-left text-xs text-foreground">
+                        <thead className="bg-muted/40 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border">
+                          <tr>
+                            <th className="p-3 pl-4">{language === "zh" ? "用户名" : "Username"}</th>
+                            <th className="p-3">{language === "zh" ? "角色权限" : "Role"}</th>
+                            <th className="p-3">{language === "zh" ? "账号状态" : "Status"}</th>
+                            <th className="p-3 pr-4 text-right">{language === "zh" ? "控制管理" : "Actions"}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border font-semibold">
+                          {users.map((u) => {
+                            const isSelf = u.username === activeUser;
+                            return (
+                              <tr key={u.username} className="hover:bg-muted/30 transition-colors">
+                                <td className="p-3 pl-4 font-bold flex items-center gap-1.5">
+                                  <span>{u.username}</span>
+                                  {isSelf && (
+                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground font-semibold">
+                                      {language === "zh" ? "我" : "Self"}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                    u.role === "admin" 
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30" 
+                                      : u.role === "manager"
+                                        ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+                                        : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                                  }`}>
+                                    {u.role === "admin" 
+                                      ? (language === "zh" ? "管理员 (Admin)" : "Admin") 
+                                      : u.role === "manager"
+                                        ? (language === "zh" ? "数据管理 (Manager)" : "Data Manager")
+                                        : (language === "zh" ? "摄影师 (Member)" : "Member")}
+                                  </span>
+                                </td>
+                                <td className="p-3">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`h-1.5 w-1.5 rounded-full ${u.is_active === 1 ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`}></span>
+                                    <span>{u.is_active === 1 ? (language === "zh" ? "已启用" : "Active") : (language === "zh" ? "已禁用" : "Disabled")}</span>
+                                  </div>
+                                </td>
+                                <td className="p-3 pr-4 text-right space-x-1.5">
+                                  {/* Action 1: Reset Password */}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 text-xs text-amber-500 hover:text-amber-400 hover:bg-amber-950/10 cursor-pointer font-semibold"
+                                    onClick={() => {
+                                      setResetUserTarget(u.username);
+                                      setResetNewPass("");
+                                      setShowResetPass(true);
+                                      setShowAddUser(false);
+                                    }}
+                                  >
+                                    <KeyRound className="w-3.5 h-3.5" />
+                                  </Button>
+
+                                  {/* Action 2: Disable / Enable Account */}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    disabled={isSelf}
+                                    className={`h-7 text-xs cursor-pointer font-semibold ${
+                                      u.is_active === 1 
+                                        ? "text-red-500 hover:text-red-400 hover:bg-red-950/10" 
+                                        : "text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/10"
+                                    }`}
+                                    onClick={() => handleToggleStatus(u.username, u.is_active)}
+                                  >
+                                    {u.is_active === 1 ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
+                                  </Button>
+
+                                  {/* Action 3: Delete Account */}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    disabled={isSelf}
+                                    className="h-7 text-xs text-zinc-500 hover:text-red-400 hover:bg-red-950/10 cursor-pointer font-semibold"
+                                    onClick={() => handleDeleteUser(u.username)}
+                                  >
+                                    <UserMinus className="w-3.5 h-3.5" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Responsive Card List (Mobile View) */}
+                    <div className="block sm:hidden space-y-3">
+                      {users.map((u) => {
+                        const isSelf = u.username === activeUser;
+                        return (
+                          <div 
+                            key={u.username}
+                            className="p-4 rounded-xl border border-border bg-card/45 backdrop-blur-md shadow-xs space-y-3"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="font-bold text-sm flex items-center gap-1.5 min-w-0">
+                                <span className="truncate">{u.username}</span>
                                 {isSelf && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground font-semibold">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground font-semibold shrink-0">
                                     {language === "zh" ? "我" : "Self"}
                                   </span>
                                 )}
-                              </td>
-                              <td className="p-3">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                                  u.role === "admin" 
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30" 
-                                    : u.role === "manager"
-                                      ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
-                                      : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
-                                }`}>
-                                  {u.role === "admin" 
-                                    ? (language === "zh" ? "管理员 (Admin)" : "Admin") 
-                                    : u.role === "manager"
-                                      ? (language === "zh" ? "数据管理 (Manager)" : "Data Manager")
-                                      : (language === "zh" ? "摄影师 (Member)" : "Member")}
+                              </div>
+                              
+                              <span className={`shrink-0 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                u.role === "admin" 
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30" 
+                                  : u.role === "manager"
+                                    ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+                                    : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                              }`}>
+                                {u.role === "admin" 
+                                  ? (language === "zh" ? "管理员 (Admin)" : "Admin") 
+                                  : u.role === "manager"
+                                    ? (language === "zh" ? "数据管理 (Manager)" : "Data Manager")
+                                    : (language === "zh" ? "摄影师 (Member)" : "Member")}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs pt-2 border-t border-border/40">
+                              <div className="flex items-center gap-1.5 font-semibold">
+                                <span className={`h-1.5 w-1.5 rounded-full ${u.is_active === 1 ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`}></span>
+                                <span className="text-muted-foreground text-[10px] font-bold">
+                                  {u.is_active === 1 ? (language === "zh" ? "已启用" : "Active") : (language === "zh" ? "已禁用" : "Disabled")}
                                 </span>
-                              </td>
-                              <td className="p-3">
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`h-1.5 w-1.5 rounded-full ${u.is_active === 1 ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`}></span>
-                                  <span>{u.is_active === 1 ? (language === "zh" ? "已启用" : "Active") : (language === "zh" ? "已禁用" : "Disabled")}</span>
-                                </div>
-                              </td>
-                              <td className="p-3 pr-4 text-right space-x-1.5">
+                              </div>
+                              
+                              <div className="flex items-center gap-0.5">
                                 {/* Action 1: Reset Password */}
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-7 text-xs text-amber-500 hover:text-amber-400 hover:bg-amber-950/10 cursor-pointer font-semibold"
+                                  className="h-8 w-8 rounded-md text-amber-500 hover:text-amber-400 hover:bg-amber-950/10 cursor-pointer"
                                   onClick={() => {
                                     setResetUserTarget(u.username);
                                     setResetNewPass("");
                                     setShowResetPass(true);
                                     setShowAddUser(false);
                                   }}
+                                  title={language === "zh" ? "重置密码" : "Reset Password"}
                                 >
                                   <KeyRound className="w-3.5 h-3.5" />
                                 </Button>
@@ -592,12 +686,13 @@ export default function SettingsPage() {
                                   size="sm"
                                   variant="ghost"
                                   disabled={isSelf}
-                                  className={`h-7 text-xs cursor-pointer font-semibold ${
+                                  className={`h-8 w-8 rounded-md cursor-pointer ${
                                     u.is_active === 1 
                                       ? "text-red-500 hover:text-red-400 hover:bg-red-950/10" 
                                       : "text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/10"
                                   }`}
                                   onClick={() => handleToggleStatus(u.username, u.is_active)}
+                                  title={u.is_active === 1 ? (language === "zh" ? "禁用账号" : "Disable") : (language === "zh" ? "启用账号" : "Enable")}
                                 >
                                   {u.is_active === 1 ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
                                 </Button>
@@ -607,18 +702,19 @@ export default function SettingsPage() {
                                   size="sm"
                                   variant="ghost"
                                   disabled={isSelf}
-                                  className="h-7 text-xs text-zinc-500 hover:text-red-400 hover:bg-red-950/10 cursor-pointer font-semibold"
+                                  className="h-8 w-8 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-950/10 cursor-pointer"
                                   onClick={() => handleDeleteUser(u.username)}
+                                  title={language === "zh" ? "删除账号" : "Delete Account"}
                                 >
                                   <UserMinus className="w-3.5 h-3.5" />
                                 </Button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
