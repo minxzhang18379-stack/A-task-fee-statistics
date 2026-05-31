@@ -8,25 +8,25 @@
 
 **PANN Task Manager** 是一款面向内容制作团队、摄影俱乐部以及独立自由职业者的**多端智能任务与稿费统计管理系统**。
 
-系统采用创新的**多端协同架构**，全面适配 Windows 桌面端应用（基于 Tauri）以及 Web/移动手机端（基于 Cloudflare Pages 部署）。系统支持“云端数据实时共享”与“本地单机离线运行”双重模式，并拥有精美的玻璃拟态（Glassmorphism）暗黑美学 UI 设计与高度完善的安全鉴权机制。
+系统采用创新的**多端协同架构**，全面适配 Windows 桌面端应用（基于 Tauri）以及 Web/移动手机端（基于 Cloudflare Pages 部署）。系统支持“云端数据实时共享”与“单机离线运行”双重模式，并拥有精美的玻璃拟态（Glassmorphism）暗黑美学 UI 设计与高度完善的安全鉴权机制。
 
 ---
 
 ## 🌟 核心特性
 
 *   **📱 跨端跨平台适配**：
-    *   **桌面客户端 (Windows)**：基于 Tauri 2.x 原生编译，包体积极小（约 3.9MB 安装包），内存占用极低，集成系统原生通知与本地独立 SQLite。
+    *   **桌面客户端 (Windows)**：基于 Tauri 2.x 原生编译，包体积极小（约 3.9MB 安装包），内存占用极低，集成系统原生通知与单机独立 SQLite。
     *   **Web 网页与移动端**：适配 iOS/Android 移动端屏幕，提供自适应侧边抽屉式导航与全面流畅的手势响应。
 *   **🔄 云端同步与离线降级双路由**：
     *   **在线云端模式**：所有终端实时与 Cloudflare D1 边缘数据库同步，满足多人协同录入、实时统计与统计大盘共享的需求。
-    *   **离线单机模式**：Tauri 客户端在无网或未配服务器时，自动无缝切换至本地物理 SQLite 数据库（`tasks.db`）独立运行。
+    *   **离线单机模式**：Tauri 客户端在无网或未配服务器时，自动无缝切换至单机物理 SQLite 数据库（`tasks.db`）独立运行。
 *   **🔒 工业级加盐哈希与 JWT 动态鉴权**：
     *   **动态多用户隔离**：彻底摆脱静态全局密码限制，支持为团队中无限个不同成员分配独立的用户名与密码。
     *   **PBKDF2 金融级防爆破存储**：云端拒绝存储任何明文密码。密码在入库前自动由 Web Crypto 引擎结合随机盐（`salt`）进行 **100,000次 PBKDF2-SHA256 加盐迭代哈希运算**。
     *   **无感登录与 Token 过期机制**：用户登录通过后，单次签发 12 小时有效期的临时 JWT 会话令牌。前端在 API 通信中仅传递该 JWT，在保障安全的同时实现 localStorage 零密码泄露。
     *   **可视化“密码管理终端”与角色权限矩阵 (v1.1.2 升级版)**：
-        *   **超级管理员 (Admin)**：在【设置】页面独享“密码管理终端”和“本地 SQLite 数据库”卡片。支持动态添加/禁用用户账号、重置密码、以及整库清空等底层运维操作。
-        *   **数据管理 (Manager) [新增]**：专为业务主管打造的协作角色。在【任务列表】页面拥有与 Admin 完全相同的任务编辑、单条删除、Excel/TXT 批量导入和批量更新删除权限；但在【系统设置】页面中完全隐藏“用户与密码管理终端”与“本地 SQLite 数据库”卡片，保障账户大盘及数据库底座的绝对安全。
+        *   **超级管理员 (Admin)**：在【设置】页面独享“密码管理终端”和“单机 SQLite 数据库”卡片。支持动态添加/禁用用户账号、重置密码、以及整库清空等底层运维操作。
+        *   **数据管理 (Manager) [新增]**：专为业务主管打造的协作角色。在【任务列表】页面拥有与 Admin 完全相同的任务编辑、单条删除、Excel/TXT 批量导入和批量更新删除权限；但在【系统设置】页面中完全隐藏“用户与密码管理终端”与“单机 SQLite 数据库”卡片，保障账户大盘及数据库底座的绝对安全。
         *   **普通摄影师 (Member)**：极简只读/防误触安全隔离。登录后不仅限制写操作，前端还会在 DOM 中物理选择性移除所有添加、编辑、导入、导出、批量多选及操作列。设置页面仅限切换语言与主题，隐藏所有账号及数据库管理控制，且服务端 API 会对 member 的写入请求执行严格鉴权阻断（返回 403 Forbidden），确保数据大盘防篡改、防误触。
 *   **📊 强大的数据导入导出引擎**：
     *   **Excel 智能导入**：支持识别格式混乱的外部表格，智能提取“任务名称”、“拍摄人”、“任务类型”、“任务日期”与“稿费”等关键维度。
@@ -51,7 +51,7 @@ graph TD
     subgraph ClientLayer ["客户端层 (多端适配)"]
         WebClient["Web网页/手机端浏览器"] -->|"标准 HTTPS 请求"| CF_Gateway
         TauriClient["Tauri 桌面端 (.exe)"] -->|"API 请求 (携带 JWT)"| CF_Gateway
-        TauriClient -.->|"无网状态下自动降级"| LocalSQLite[("本地物理 SQLite (tasks.db)")]
+        TauriClient -.->|"无网状态下自动降级"| LocalSQLite[("单机物理 SQLite (tasks.db)")]
     end
 
     subgraph ServerLayer ["服务端 (Cloudflare Serverless 边缘网络)"]
@@ -94,11 +94,11 @@ f:\PANN\任务稿费统计/
 ├── src/                        # 前端 React 源码
 │   ├── assets/                 # 静态图片资源 (Logo 等)
 │   ├── components/
-│   │   ├── login-gate.tsx      # 用户名+密码登录门禁 (包含 JWT 自动校验与本地单机切换)
+│   │   ├── login-gate.tsx      # 用户名+密码登录门禁 (包含 JWT 自动校验与单机离线模式切换)
 │   │   ├── layout.tsx          # 玻璃美学外壳 (集成自适应移动端 Hamburger 侧抽屉菜单)
 │   │   └── ui/                 # 基础原子化 UI 组件 (Shadcn UI / Tailwind)
 │   ├── lib/
-│   │   ├── db.ts               # [核心] 统一数据库分流路由器 (自动判断云端/本地运行环境)
+│   │   ├── db.ts               # [核心] 统一数据库分流路由器 (自动判断云端/单机运行环境)
 │   │   └── excelEngine.ts      # 智能 Excel 导入/解析及 Blob 导出引擎
 │   ├── pages/                  # 业务功能页面
 │   │   ├── dashboard.tsx       # 任务及稿费数据可视化主面板
@@ -149,14 +149,14 @@ CREATE INDEX IF NOT EXISTS idx_photographer ON TaskRecord(photographer);
 
 ---
 
-## 🛠️ 本地开发指南
+## 🛠️ 开发指南
 
 ### 1. 开发环境前置要求
 *   **Node.js**：v18.0.0 以上 (推荐 v22)
 *   **Rust**：推荐安装 Rustc & Cargo (如果您需要重构并编译 Tauri 桌面应用)
 
 ### 2. 初始化项目依赖
-克隆项目到本地后，在根目录下执行：
+克隆项目后，在根目录下执行：
 ```bash
 npm install
 ```
@@ -168,9 +168,9 @@ npm run dev
 ```
 
 ### 4. 运行 Serverless 后端模拟器 (Cloudflare Wrangler)
-本项目的 Serverless API 依赖于 Cloudflare 环境。要在本地同时模拟前端、Functions 路由以及本地 D1 数据库，可利用 Wrangler CLI：
+本项目的 Serverless API 依赖于 Cloudflare 环境。要在模拟环境下同时运行前端、Functions 路由以及 D1 数据库，可利用 Wrangler CLI：
 ```bash
-# 启动本地模拟环境 (Vite 静态文件 + D1 数据库 + Pages API 连通)
+# 启动模拟环境 (Vite 静态文件 + D1 数据库 + Pages API 连通)
 npx wrangler pages dev dist --compatibility-date=2026-05-28 --d1=DB
 ```
 
@@ -193,7 +193,7 @@ npm run tauri dev
 4.  将本项目根目录下的 [schema.sql](file:///f:/PANN/任务稿费统计/schema.sql) 文件中的数据表与索引建表 SQL 完整复制到 Console 中并点击 **Execute** 运行，完成数据表初始化。
 
 ### 第二步：部署 Cloudflare Pages
-1.  将您的本地代码推送至您的私有 GitHub 仓库。
+1.  将您的代码推送至您的私有 GitHub 仓库。
 2.  在 Cloudflare 控制台选择 **Workers & Pages > Create application > Pages > Connect to Git**，选择您的仓库。
 3.  在构建配置中选择：
     *   **Framework preset**：`Vite`

@@ -53,7 +53,7 @@ export function LoginGate({ children }: LoginGateProps) {
         .catch(() => {
           // Fallback if remote server is unreachable
           if (isTauri) {
-            setAuthError("无法连接到云端数据库，您可在下方切换到本地离线模式");
+            setAuthError("无法连接到云端数据库，您可在下方切换到单机离线模式");
           } else {
             setAuthError("无法连接到服务器，请检查网络");
           }
@@ -242,7 +242,7 @@ export function LoginGate({ children }: LoginGateProps) {
                         : "text-zinc-400 hover:text-zinc-200"
                     }`}
                   >
-                    本地单机模式
+                    单机离线模式
                   </button>
                 </div>
               </div>
@@ -297,7 +297,7 @@ export function LoginGate({ children }: LoginGateProps) {
               <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-850 space-y-2 text-center py-6 animate-fadeIn">
                 <p className="text-sm font-semibold text-zinc-200">离线使用模式</p>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  本地单机模式下将直接连接本地的 SQLite 数据库 `tasks.db`，数据独立保存在本机上，不需要密码和网络连接。
+                  单机离线模式下将直接连接 SQLite 数据库 `tasks.db`，数据独立保存在本机上，不需要密码和网络连接。
                 </p>
               </div>
             )}
@@ -313,7 +313,7 @@ export function LoginGate({ children }: LoginGateProps) {
               type="submit"
               className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-medium shadow-lg hover:shadow-emerald-500/10 h-10 mt-2 transition-all duration-300 rounded-lg"
             >
-              {mode === "cloud" ? "连接云端同步" : "进入本地系统"}
+              {mode === "cloud" ? "连接云端同步" : "进入单机系统"}
             </Button>
           </form>
         </CardContent>

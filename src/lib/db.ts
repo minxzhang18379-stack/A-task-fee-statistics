@@ -13,7 +13,7 @@ export interface Task {
   fee: number;          // 稿费
 }
 
-// 获取当前数据库模式 (云端同步 / 本地单机)
+// 获取当前数据库模式 (云端同步 / 单机离线)
 export const getDbMode = (): 'cloud' | 'local' => {
   if (!isTauri) return 'cloud'; // 网页版始终为云端同步模式
   return (localStorage.getItem('pann_db_mode') as 'cloud' | 'local') || 'local';
@@ -65,10 +65,10 @@ const cloudFetch = async (method: string, path: string, body?: any) => {
   return res;
 };
 
-// 初始化本地 SQLite 数据库 (仅在桌面端可用)
+// 初始化单机 SQLite 数据库 (仅在桌面端可用)
 export const initDb = async () => {
   if (!isTauri) {
-    throw new Error('本地 SQLite 数据库仅在桌面端软件中受支持');
+    throw new Error('单机 SQLite 数据库仅在桌面端软件中受支持');
   }
 
   if (!dbInstance) {
@@ -103,7 +103,7 @@ export const initDb = async () => {
         WHERE INSTR(title, '地点:') > 0
       `);
     } catch (e) {
-      console.error("启动时本地数据库名字/标题清洗失败:", e);
+      console.error("启动时单机数据库名字/标题清洗失败:", e);
     }
 
     try { await dbInstance.execute("DROP TABLE IF EXISTS Remuneration"); } catch (_) {}

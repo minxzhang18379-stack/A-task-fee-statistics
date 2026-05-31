@@ -336,7 +336,7 @@ export async function exportToExcel(specificTasks?: any[], filenamePrefix = "稿
 
       sendNotification({
         title: '导出成功',
-        body: `报表已下载到您的本地设备`,
+        body: `报表已下载到您的设备`,
       });
     }
   } catch (error) {
@@ -550,7 +550,7 @@ export async function exportPersonalBill(tasks: any[], filenamePrefix: string, l
 
       sendNotification({
         title: language === "zh" ? '导出成功' : 'Export Succeeded',
-        body: language === "zh" ? `个人账单已下载到您的本地设备` : `Personal bill downloaded to your device`,
+        body: language === "zh" ? `个人账单已下载到您的设备` : `Personal bill downloaded to your device`,
       });
     }
   } catch (error) {

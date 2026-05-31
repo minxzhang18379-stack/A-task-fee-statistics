@@ -26,7 +26,7 @@ const translations: Record<Language, Record<string, any>> = {
     },
     dashboard: {
       title: "总览",
-      subtitle: "本地 SQLite 数据库任务登记、分月归类与稿费发放统计中心",
+      subtitle: "单机 SQLite 数据库任务登记、分月归类与稿费发放统计中心",
       filterLabel: "切换统计月份:",
       allMonths: "全部月份 (累计)",
       exportBtn: "导出 Excel",
@@ -35,7 +35,7 @@ const translations: Record<Language, Record<string, any>> = {
         payoutBudget: "月度稿费预算",
         activePhotographers: "活跃拍摄人",
         taskTypes: "涉及任务类别",
-        descTasksAll: "本地已登记任务总数",
+        descTasksAll: "已登记任务总数",
         descTasksMonth: "{month}任务数",
         descFeesAll: "累计稿费支出总计",
         descFeesMonth: "{month}稿费总额",
@@ -62,7 +62,7 @@ const translations: Record<Language, Record<string, any>> = {
     },
     tasks: {
       title: "任务与稿费管理",
-      subtitle: "本地数据库一键登记、管理与统计您的任务及稿费明细",
+      subtitle: "数据库一键登记、管理与统计您的任务及稿费明细",
       syncBadge: "已同步 {count} 条记录",
       importExcel: "导入 Excel",
       importTxt: "导入 TXT",
@@ -216,12 +216,12 @@ const translations: Record<Language, Record<string, any>> = {
         themeSystem: "跟随系统"
       },
       cardDb: {
-        title: "本地 SQLite 数据库",
+        title: "单机 SQLite 数据库",
         desc: "查看数据库连接状态并提供数据清空防线（高危操作）",
         status: "数据库状态:",
         btnClear: "一键清空 TaskRecord 数据",
         confirmTitle: "高危操作确认！",
-        confirmDesc: "您确定要彻底清空本地 SQLite 数据库中的所有任务与稿费登记流水吗？此操作不可逆，原有的所有数据都将被彻底清除！",
+        confirmDesc: "您确定要彻底清空单机 SQLite 数据库中的所有任务与稿费登记流水吗？此操作不可逆，原有的所有数据都将被彻底清除！",
         btnCancel: "放弃清空",
         btnConfirm: "我已悉知，确定清空",
         alertSuccess: "数据库已清空成功！",
