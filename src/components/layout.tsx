@@ -87,16 +87,16 @@ export function Layout() {
         />
       )}
 
-      {/* Sidebar (frosted glass responsive layout) */}
+      {/* Sidebar (Neumorphic rightward-shadow extruded panel) */}
       <aside 
-        className={`shrink-0 border-r border-border bg-card/90 backdrop-blur-md flex flex-col select-none z-50 transition-transform duration-300 ease-in-out
+        className={`shrink-0 border-r-0 bg-card shadow-[4px_0_12px_#d1d9e6] dark:shadow-[4px_0_12px_#0f151e] flex flex-col select-none z-50 transition-all duration-300 ease-in-out
           fixed inset-y-0 left-0 md:relative md:translate-x-0
           ${isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"}
         `}
         style={{ width: isMobileMenuOpen ? "240px" : `${sidebarWidth}px` }}
       >
         {/* Logo & Close Button */}
-        <div className="h-14 flex items-center justify-between px-5 border-b border-border">
+        <div className="h-14 flex items-center justify-between px-5 border-b-0">
           <div className="flex items-center min-w-0">
             <img src={logo} alt="PANN Logo" className="w-7 h-7 rounded-md object-contain mr-2.5 dark:invert transition-all" />
             <span className="font-bold text-sm tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text truncate">
@@ -132,10 +132,10 @@ export function Layout() {
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    ? "nm-pressed text-primary"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -148,8 +148,8 @@ export function Layout() {
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        {/* Header (frosted glass responsive layout) */}
-        <header className="h-14 shrink-0 border-b border-border bg-background/40 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-20">
+        {/* Header (flat borderless skeuomorphic header) */}
+        <header className="h-14 shrink-0 bg-background flex items-center justify-between px-4 md:px-6 z-20">
           <div className="flex items-center gap-3">
             {/* Hamburger menu button for mobile */}
             <Button
