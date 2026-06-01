@@ -247,7 +247,6 @@ export default function SettingsPage() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text">{t("settings.title")}</h2>
-        <p className="text-muted-foreground text-sm mt-1">{t("settings.subtitle")}</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 items-start">

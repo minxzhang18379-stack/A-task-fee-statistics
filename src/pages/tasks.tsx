@@ -699,14 +699,13 @@ export default function TasksPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text">{t("tasks.title")}</h2>
-          <p className="text-muted-foreground text-sm mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span>{t("tasks.subtitle")}</span>
-            {tasks.length > 0 && (
+          {tasks.length > 0 && (
+            <p className="text-muted-foreground text-sm mt-1">
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold tracking-wider animate-in fade-in zoom-in duration-300">
                 {t("tasks.syncBadge", { count: tasks.length })}
               </span>
-            )}
-          </p>
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {hasWritePermission && (

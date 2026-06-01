@@ -245,9 +245,6 @@ export default function StatsPage() {
         <h2 className="text-2xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text">
           {t("stats.title")}
         </h2>
-        <p className="text-muted-foreground text-sm mt-1">
-          {t("stats.subtitle")}
-        </p>
       </div>
 
       {/* Tabs Selector */}

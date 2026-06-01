@@ -173,7 +173,6 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text">{t("dashboard.title")}</h2>
-          <p className="text-muted-foreground text-sm mt-1">{t("dashboard.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Month Quick Filter */}
