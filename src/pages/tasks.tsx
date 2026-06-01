@@ -124,6 +124,14 @@ export default function TasksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [jumpInput, setJumpInput] = useState("");
+  
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Reset page when filter or page size changes
   useEffect(() => {
@@ -1034,14 +1042,15 @@ export default function TasksPage() {
             {/* Sliding page numbers */}
             {(() => {
               const pages: number[] = [];
-              const half = 2;
+              const maxVisible = isMobile ? 3 : 5;
+              const half = Math.floor(maxVisible / 2);
               let start = Math.max(1, activePage - half);
               let end = Math.min(totalPages, activePage + half);
               
               if (activePage <= half) {
-                end = Math.min(totalPages, start + 4);
+                end = Math.min(totalPages, start + (maxVisible - 1));
               } else if (activePage + half >= totalPages) {
-                start = Math.max(1, end - 4);
+                start = Math.max(1, end - (maxVisible - 1));
               }
               
               for (let i = start; i <= end; i++) {
