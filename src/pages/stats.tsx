@@ -671,7 +671,7 @@ export default function StatsPage() {
                             <FileText className="w-3.5 h-3.5 text-muted-foreground/85" /> {language === "zh" ? "任务:" : "Tasks:"} <span className="text-foreground">{week.totalTasks} {language === "zh" ? "个" : "pcs"}</span>
                           </span>
                           <span className="text-muted-foreground flex items-center gap-1">
-                            <YuanIcon className="w-3.5 h-3.5 text-muted-foreground/85" /> {language === "zh" ? "总支出:" : "Total Payout:"} <span className="text-emerald-600 dark:text-emerald-400 font-bold">¥{week.totalFees.toFixed(2)}</span>
+                            <YuanIcon className="w-3.5 h-3.5 text-muted-foreground/85" /> {language === "zh" ? "总稿费:" : "Total Payout:"} <span className="text-emerald-600 dark:text-emerald-400 font-bold">¥{week.totalFees.toFixed(2)}</span>
                           </span>
                         </div>
                       </div>
@@ -749,30 +749,30 @@ export default function StatsPage() {
 
                     {/* Expand Detail List */}
                     {isExpanded && (
-                      <div className="border-t bg-muted/10 p-4 animate-in slide-in-from-top-1 duration-150">
+                      <div className="border-t bg-muted/10 p-4 md:p-6 animate-in slide-in-from-top-1 duration-150">
                         {/* Desktop View */}
                         <div className="hidden md:block overflow-x-auto rounded-md border border-border bg-card">
                           <table className="w-full border-collapse text-left text-xs">
                             <thead>
                               <tr className="bg-muted/40 border-b font-semibold text-muted-foreground">
-                                <th className="py-2.5 px-3">{t("stats.tableWeek.detailDate")}</th>
-                                <th className="py-2.5 px-3">{t("stats.tableWeek.detailName")}</th>
-                                <th className="py-2.5 px-3">{t("stats.tableWeek.detailPhoto")}</th>
-                                <th className="py-2.5 px-3">{t("stats.tableWeek.detailType")}</th>
-                                <th className="py-2.5 px-3 text-right">{t("stats.tableWeek.detailFee")}</th>
+                                <th className="py-3 px-4 md:px-6">{t("stats.tableWeek.detailDate")}</th>
+                                <th className="py-3 px-4 md:px-6">{t("stats.tableWeek.detailName")}</th>
+                                <th className="py-3 px-4 md:px-6">{t("stats.tableWeek.detailPhoto")}</th>
+                                <th className="py-3 px-4 md:px-6">{t("stats.tableWeek.detailType")}</th>
+                                <th className="py-3 px-4 md:px-6 text-right">{t("stats.tableWeek.detailFee")}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y">
                               {week.tasks.map((task) => (
                                 <tr key={task.id} className="hover:bg-muted/20 transition-colors">
-                                  <td className="py-2 px-3 text-muted-foreground whitespace-nowrap">{task.taskDate}</td>
-                                  <td className="py-2 px-3 font-semibold text-foreground">{task.title}</td>
-                                  <td className="py-2 px-3 flex-wrap">
+                                  <td className="py-2.5 px-4 md:px-6 text-muted-foreground whitespace-nowrap">{task.taskDate}</td>
+                                  <td className="py-2.5 px-4 md:px-6 font-semibold text-foreground">{task.title}</td>
+                                  <td className="py-2.5 px-4 md:px-6 flex-wrap">
                                     <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-muted text-[10px] font-semibold text-muted-foreground">
                                       {task.photographer}
                                     </span>
                                   </td>
-                                  <td className="py-2 px-3">
+                                  <td className="py-2.5 px-4 md:px-6">
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
                                       task.taskType === "重大" 
                                         ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30" 
@@ -781,7 +781,7 @@ export default function StatsPage() {
                                       {task.taskType === "重大" ? t("tasks.table.majorBadge") : task.taskType === "非重大" ? t("tasks.table.minorBadge") : t("tasks.table.customBadge")}
                                     </span>
                                   </td>
-                                  <td className="py-2 px-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                                  <td className="py-2.5 px-4 md:px-6 text-right font-bold text-emerald-600 dark:text-emerald-400">
                                     ¥{(task.fee || 0).toFixed(2)}
                                   </td>
                                 </tr>

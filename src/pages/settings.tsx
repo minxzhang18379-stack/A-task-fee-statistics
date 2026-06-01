@@ -544,13 +544,15 @@ export default function SettingsPage() {
                             const isSelf = u.username === activeUser;
                             return (
                               <tr key={u.username} className="hover:bg-muted/30 transition-colors">
-                                <td className="p-3 pl-4 font-bold flex items-center gap-1.5">
-                                  <span>{u.username}</span>
-                                  {isSelf && (
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground font-semibold">
-                                      {language === "zh" ? "我" : "Self"}
-                                    </span>
-                                  )}
+                                <td className="p-3 pl-4 font-bold">
+                                  <div className="flex items-center gap-1.5">
+                                    <span>{u.username}</span>
+                                    {isSelf && (
+                                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted border border-border text-muted-foreground font-semibold">
+                                        {language === "zh" ? "我" : "Self"}
+                                      </span>
+                                    )}
+                                  </div>
                                 </td>
                                 <td className="p-3">
                                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
