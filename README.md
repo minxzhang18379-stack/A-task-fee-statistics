@@ -8,7 +8,7 @@
 
 **PANN Task Manager** 是一款面向内容制作团队、摄影俱乐部以及独立自由职业者的**多端智能任务与稿费统计管理系统**。
 
-系统采用创新的**多端协同架构**，全面适配 Windows 桌面端应用（基于 Tauri）以及 Web/移动手机端（基于 Cloudflare Pages 部署）。系统支持“云端数据实时共享”与“单机离线运行”双重模式，并拥有精美的玻璃拟态（Glassmorphism）暗黑美学 UI 设计与高度完善的安全鉴权机制。
+系统采用创新的**多端协同架构**，全面适配 Windows 桌面端应用（基于 Tauri）以及 Web/移动手机端（基于 Cloudflare Pages 部署）。系统支持“云端数据实时共享”与“单机离线运行”双重模式，并拥有惊艳夺目的 **PANN 实体拟物美学（Skeuomorphic Neumorphism / Soft UI）光影动感 UI 设计** 与高度完善的安全鉴权机制。
 
 ---
 
@@ -32,15 +32,28 @@
     *   **Excel 智能导入**：支持识别格式混乱的外部表格，智能提取“任务名称”、“拍摄人”、“任务类型”、“任务日期”与“稿费”等关键维度。
     *   **物理文本清洗规则 (DRY 业务服务)**：支持在入库前自动对拍摄人后缀（如“（修图）”、“(修图)”）和地点拆分规则进行规范化清洗，确保大盘统计维度绝对纯净。
     *   **Excel 高级导出**：支持按照模板导出带有求和公式、边框样式及表头标题之专业稿费汇总单，并支持一键为特定摄影师生成个人对账单。
-*   **🌗 现代玻璃拟态与极客双语排版系统**：
-    *   **超感玻璃卡片质感**：基于 Tailwind CSS + Shadcn UI 深度定制的暗黑玻璃透光美学，在 v1.1.2 中深度重构 `.bg-card`，将背景模糊提升至 `blur(20px)`，在亮色模式下融入 slate-200 描边，使毛玻璃卡片拥有真实厚重的高级透光折射感。
-    *   **IBM Plex Sans 双语排版**：引入 Google Fonts 预连接并配置 **IBM Plex 无衬线双语排版系统**。英文与数字优先渲染为极简精细的 `IBM Plex Sans`（长串对账金额排列极为整齐），中文回落至 `IBM Plex Sans SC`（简体中文），大幅优化视觉体验。
-    *   **移动端自适应重构 (v1.1.2 Premium 级响应式优化)**：彻底解决移动端小屏幕下列宽受限、文字被迫换行、数据列堆叠截断、以及报表导出按钮严重挤压的体验痛点。
-        *   **【系统设置】自适应重构**：表单在小屏下从原本的 3 列强行网格自动转换为单列自适应纵向排布 (`grid-cols-1 sm:grid-cols-3`)；用户账号表格彻底隐退，自动替换为**极简自适应玻璃卡片账户列表** (`block sm:hidden`)，以圆形的启用/禁用及密码重置玻璃按钮保证全屏触控顺滑。
-        *   **【数据统计】Bento 微件化重构 (`stats.tsx`)**：
-            1.  **每周任务统计**：在移动端抛弃扁平 Row Flex 结构，头部周区间与 Chevron 折叠箭头两端对齐，下方采用双列 **Bento-style 玻璃药丸微件网格**（左列 `FileText` 任务数，右列 `YuanIcon` 总支出），底部配备 100% 全宽大面积圆角导出按钮，极致防误触。点击展开周明细后，内嵌 Table 自适应转换为磨砂微型任务卡片栈，每个任务项均配备独立的 Camera（拍摄人）与 Calendar（日期）双列 Bento 水平小药丸。
-            2.  **每月任务统计**：小屏下彻底隐藏表格，封装为月份卡片序列，内置四色 **2×2 四宫格自适应 Bento 数据板**：总任务（`Briefcase`，深海蓝）、计发稿费（`YuanIcon`，翡翠绿）、重大任务（`Layers`，玫瑰红）以及非重大任务（`FileText`，灰蓝）。
-            3.  **摄影师月度稿费统计**：隐退长表格，转换为精美排行卡片列表。首三名独享 🥇、🥈、🥉 等尊贵奖牌微章，右上角以高亮翡翠绿大字突出应得总稿费。卡片底部并排两个 Bento 小药丸：参与任务数（`Briefcase`）与**稿费占比（`PieChart` 饼图图标，完美替换原有的易误导之趋势箭头）**，直观传达静态比例关系。
+*   **🌗 PANN 实体拟物美学 (Skeuomorphic Neumorphism / Soft UI) [v1.1.2 全量演进]**：
+    *   **高保真物理阴影范式**：全量重置设计 Tokens 变量。物理剥离了多余的硬边框与霓虹底色，完全依靠亮部（左上）与暗部（右下）45度双光源极度轻柔微弱的投影来塑造悬浮与物理挤压质感。
+    *   **实体化容器与交互微动**：
+        *   **`.nm-flat`（平铺挤压状态）**：卡片与外围容器整体圆角扩宽至 `rounded-2xl`，与底色无缝连通，营造仿佛从单一实体平面自然雕刻而出的雕琢美学。
+        *   **`.nm-pressed`（物理下陷状态）**：输入框与激活链接展现为内凹的触觉凹槽托盘，提供完美的容器包裹感。
+        *   **`.nm-btn`（交互微动按钮）**：悬停时产生轻盈的浮起，点击（`:active`）时瞬间凹陷为 `.nm-pressed` 状态，呈现极富回弹弹性的物理拟真微动触控。
+    *   **IBM Plex Sans 双语排版**：预连接 Google 字体源，强制将全系统（含第三方登录门禁）英中字符映射至 `'IBM Plex Sans', 'IBM Plex Sans SC'`，实现极具几何美感、排列整齐的财务数据呈现。
+*   **📊 高阶拟物自适应分页器 (Tactile Neumorphic Pagination Controller) [v1.1.2 核心升级]**：
+    *   **数据管道虚拟切片**：在【任务与稿费】管理页面中截断 TanStack Table 表格引擎全量渲染，动态进行 `.slice()` 反应式高性能虚拟切片挂载，彻底消灭超千条数据一次性挂载带来的 DOM 卡顿与帧率骤降。
+    *   **防御式重置与钳制**：设立月份归类、全局搜索及容量更改时的 `currentPage = 1` 自动复位副作用；对跳转页码实行 `Math.min(currentPage, totalPages)` 防越界安全钳制，杜绝白屏。
+    *   **手机视口防折行自适应**：引入 React `isMobile` 视口宽度自动侦听。一旦处于 `< 640px` 手机端，滑动页码窗口自动从 `5` 缩紧为 `3`（合计 7 个控制键），保证在任何窄屏手机上均**百分百完美单行对齐**，彻底规避折行问题。
+    *   **跳转框文本居中与 Spin Buttons 隐藏**：在全局 CSS 中隐藏 WebKit / Gecko 浏览器 number 输入框自带的微调按钮，消除 Padding 挤压；将跳转框宽度拉伸为 `w-16` (64px)，确保中英双语“页码”与“Page”完美水平居中且完全显示。
+*   **📱 移动端 Bento-style 自适应重构与高频细节调优**：
+    *   **【数据统计】Bento 微件化重构**：
+        1.  **每周任务统计**：在小屏下采用 **2×2 Bento-style 药丸微件网格**，将原 `“总支出:”` 汉化标签调整为更规范的 `“总稿费:”`，并拓宽详情托盘 Padding 至响应式 `p-4 md:p-6`，表格单元格调整为 `px-4 md:px-6`，彻底消除压迫感，呈现优雅的高级呼吸留白。
+        2.  **每月任务统计**：小屏下彻底隐藏表格，封装为四色 **2×2 四宫格自适应 Bento 数据板**：总任务（`Briefcase`，深海蓝）、计发稿费（`YuanIcon`，翡翠绿）、重大任务（`Layers`，玫瑰红）以及非重大任务（`FileText`，灰蓝）。
+        3.  **摄影师月度稿费统计**：首三名独享 🥇、🥈、🥉 等尊贵奖牌微章，底部配置参与任务数（`Briefcase`）与**稿费占比（`PieChart` 饼图，传达静态比例关系）**两个 Bento 药丸。
+    *   **【系统设置】对齐与自适应**：
+        *   **用户凭证表格排版对齐**：解耦第一列 `<td>` 身上的 `flex items-center`，将其内聚到内嵌 `div` 容器中，还原 `<td>` 原生 Table-Cell 盒子模型，瞬间实现全表对齐。
+        *   表单在小屏下从 3 列强行网格自动转换为单列自适应纵向排布 (`grid-cols-1 sm:grid-cols-3`)；用户账号表格彻底隐退，自动替换为**极简自适应玻璃卡片账户列表**。
+    *   **【全局净化】说明性副标题剥离**：
+        *   物理滤除了 **总览**、**任务与稿费**、**数据统计**、**系统设置** 四个页面 Header 头部的冗余说明性副标题文本 `t("*.subtitle")`，整体布局更趋向现代、极简与干练；在任务页面中有保护地剥离了副标题，但高保真保留了 `syncBadge` 反应式同步记录徽章，保证数据库同步反馈机制完整。
 
 ---
 
@@ -73,6 +86,29 @@ graph TD
         Auth_API -->|"查询用户凭证"| D1
         Admin_API -->|"CRUD 用户账户"| D1
     end
+```
+
+### 📊 任务大盘渲染与分页切片管道架构 (Rendering & Pagination Pipeline)
+
+为保障超大规模任务数据加载时前端界面的绝对流畅性，系统在前端渲染层采用“引擎全量过滤 + 渲染管道分片”的高阶架构：
+
+```mermaid
+flowchart TD
+    RawTasks[("原始全量任务数据集 TasksState")] --> MonthFilter["1. 月份归类过滤器 MonthFilter"]
+    MonthFilter --> SearchFilter["2. 全局关键字检索 SearchFilter"]
+    SearchFilter --> FilteredTasks["已过滤数据集 filteredTasks (useMemo)"]
+    FilteredTasks --> TanStackTable["3. TanStack 表格引擎 (排序 / 过滤)"]
+    
+    subgraph PaginationPipe ["分页切片管道 (Pagination Pipeline)"]
+        SortedRows["已排序过滤行集合 allSortedFilteredRows"] --> SlicePipe{"4. 动态索引切片 (.slice)"}
+        PageSizeState["每页行数 pageSizeState (10/20/50/100)"] --> SlicePipe
+        ActivePage["活动页码 activePage (isMobile ? 3 : 5 动态页码窗口)"] --> SlicePipe
+        SlicePipe --> DisplayedRows["5. 最终渲染集 displayedRows (useMemo)"]
+    end
+    
+    TanStackTable --> SortedRows
+    DisplayedRows --> DesktopView["桌面端 Neumorphic 表格渲染"]
+    DisplayedRows --> MobileView["移动端 Bento-style 药丸自适应卡片栈"]
 ```
 
 ---
