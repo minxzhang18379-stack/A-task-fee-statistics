@@ -120,6 +120,16 @@ export default function TasksPage() {
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [jumpInput, setJumpInput] = useState("");
+
+  // Reset page when filter or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [globalFilter, selectedMonth, pageSize]);
+  
   // Batch states
   const [batchType, setBatchType] = useState("非重大");
   const [batchDate, setBatchDate] = useState("");
@@ -660,8 +670,17 @@ export default function TasksPage() {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // Compute displayed rows (bound back to TanStack Row model for standard sorted/filtered representation)
-  const displayedRows = table.getRowModel().rows;
+  // Compute total rows, total pages, active clampled page, and slice for active page display
+  const allSortedFilteredRows = table.getRowModel().rows;
+  const totalRowsCount = allSortedFilteredRows.length;
+  const totalPages = Math.ceil(totalRowsCount / pageSize) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+
+  const displayedRows = useMemo(() => {
+    const startIdx = (activePage - 1) * pageSize;
+    const endIdx = startIdx + pageSize;
+    return allSortedFilteredRows.slice(startIdx, endIdx);
+  }, [allSortedFilteredRows, activePage, pageSize]);
 
   if (isLoading) {
     return (
@@ -954,6 +973,163 @@ export default function TasksPage() {
           })
         )}
       </div>
+      
+      {/* Neumorphic Pagination Control Panel */}
+      {totalRowsCount > 0 && (
+        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-card nm-flat animate-in fade-in duration-300">
+          {/* Left: Summary info & Page size selection */}
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-semibold text-muted-foreground">
+            <span>
+              {language === "zh"
+                ? `第 ${activePage} / ${totalPages} 页`
+                : `Page ${activePage} of ${totalPages}`}
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/10">
+              {language === "zh"
+                ? `共 ${totalRowsCount} 条记录`
+                : `Total ${totalRowsCount} items`}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span>{language === "zh" ? "每页显示:" : "Page size:"}</span>
+              <select
+                className="h-8 rounded-xl bg-card border border-slate-300/40 dark:border-slate-700/40 px-2.5 text-xs font-bold cursor-pointer hover:bg-muted/40 transition-colors focus-visible:outline-none"
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Center: Numeric sliding window navigation */}
+          <div className="flex items-center gap-1.5 flex-wrap justify-center">
+            {/* First Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              className={`h-8 w-8 text-xs font-bold ${activePage === 1 ? "opacity-40 cursor-not-allowed shadow-none border-0 bg-transparent" : "nm-btn border-0 shadow-none hover:translate-y-0"}`}
+              onClick={() => activePage > 1 && setCurrentPage(1)}
+              disabled={activePage === 1}
+              title={language === "zh" ? "第一页" : "First Page"}
+            >
+              &lt;&lt;
+            </Button>
+            {/* Prev Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              className={`h-8 w-8 text-xs font-bold ${activePage === 1 ? "opacity-40 cursor-not-allowed shadow-none border-0 bg-transparent" : "nm-btn border-0 shadow-none hover:translate-y-0"}`}
+              onClick={() => activePage > 1 && setCurrentPage(activePage - 1)}
+              disabled={activePage === 1}
+              title={language === "zh" ? "上一页" : "Previous Page"}
+            >
+              &lt;
+            </Button>
+
+            {/* Sliding page numbers */}
+            {(() => {
+              const pages: number[] = [];
+              const half = 2;
+              let start = Math.max(1, activePage - half);
+              let end = Math.min(totalPages, activePage + half);
+              
+              if (activePage <= half) {
+                end = Math.min(totalPages, start + 4);
+              } else if (activePage + half >= totalPages) {
+                start = Math.max(1, end - 4);
+              }
+              
+              for (let i = start; i <= end; i++) {
+                pages.push(i);
+              }
+
+              return pages.map((p) => (
+                <Button
+                  key={p}
+                  variant={p === activePage ? "default" : "outline"}
+                  className={`h-8 min-w-[32px] px-2.5 text-xs font-bold ${
+                    p === activePage
+                      ? "nm-pressed text-primary border-0 shadow-none hover:translate-y-0 bg-primary/10 hover:bg-primary/15"
+                      : "nm-btn border-0 shadow-none hover:translate-y-0"
+                  }`}
+                  onClick={() => setCurrentPage(p)}
+                >
+                  {p}
+                </Button>
+              ));
+            })()}
+
+            {/* Next Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              className={`h-8 w-8 text-xs font-bold ${activePage === totalPages ? "opacity-40 cursor-not-allowed shadow-none border-0 bg-transparent" : "nm-btn border-0 shadow-none hover:translate-y-0"}`}
+              onClick={() => activePage < totalPages && setCurrentPage(activePage + 1)}
+              disabled={activePage === totalPages}
+              title={language === "zh" ? "下一页" : "Next Page"}
+            >
+              &gt;
+            </Button>
+            {/* Last Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              className={`h-8 w-8 text-xs font-bold ${activePage === totalPages ? "opacity-40 cursor-not-allowed shadow-none border-0 bg-transparent" : "nm-btn border-0 shadow-none hover:translate-y-0"}`}
+              onClick={() => activePage < totalPages && setCurrentPage(totalPages)}
+              disabled={activePage === totalPages}
+              title={language === "zh" ? "最后一页" : "Last Page"}
+            >
+              &gt;&gt;
+            </Button>
+          </div>
+
+          {/* Right: Quick input page jump */}
+          <div className="flex items-center gap-2 text-xs font-semibold">
+            <span>{language === "zh" ? "跳转到" : "Go to"}</span>
+            <div className="flex items-center gap-1.5">
+              <Input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder={language === "zh" ? "页码" : "Page"}
+                className="h-8 w-12 text-center text-xs font-bold p-0 rounded-xl bg-card nm-pressed focus-visible:ring-0 focus-visible:outline-none"
+                value={jumpInput}
+                onChange={(e) => setJumpInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const pageNum = parseInt(jumpInput, 10);
+                    if (pageNum >= 1 && pageNum <= totalPages) {
+                      setCurrentPage(pageNum);
+                      setJumpInput("");
+                    }
+                  }
+                }}
+              />
+              <span className="text-muted-foreground">{language === "zh" ? "页" : ""}</span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 px-3 text-xs font-bold nm-btn border-0 shadow-none hover:translate-y-0 active:translate-y-0"
+                onClick={() => {
+                  const pageNum = parseInt(jumpInput, 10);
+                  if (pageNum >= 1 && pageNum <= totalPages) {
+                    setCurrentPage(pageNum);
+                    setJumpInput("");
+                  }
+                }}
+              >
+                {language === "zh" ? "跳转" : "Go"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="pb-8" />
 
