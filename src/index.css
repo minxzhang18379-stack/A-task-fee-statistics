@@ -190,6 +190,16 @@
     outline-offset: 2px !important;
     border-color: hsl(var(--primary)) !important;
   }
+
+  /* Hide spin-buttons globally to allow centering of placeholders/values in number inputs */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }
 
 @layer utilities {

@@ -83,6 +83,7 @@ export default function StatsPage() {
   
   // Selection state for Photographer Tab
   const [selectedPhotoMonth, setSelectedPhotoMonth] = useState<string>("all");
+  const [hasSetDefaultMonth, setHasSetDefaultMonth] = useState(false);
   
   // Accordion state for Weekly Summaries Tab
   const [expandedWeeks, setExpandedWeeks] = useState<Record<string, boolean>>({});
@@ -120,12 +121,13 @@ export default function StatsPage() {
     return Array.from(new Set(months)).sort().reverse();
   }, [allTasks, language]);
 
-  // Set default selected month on load
+  // Set default selected month to the latest month on initial data load
   useEffect(() => {
-    if (availableMonths.length > 0 && selectedPhotoMonth === "all") {
+    if (availableMonths.length > 0 && !hasSetDefaultMonth) {
       setSelectedPhotoMonth(availableMonths[0]);
+      setHasSetDefaultMonth(true);
     }
-  }, [availableMonths, selectedPhotoMonth]);
+  }, [availableMonths, hasSetDefaultMonth]);
 
   // --- 1. Per-Person Monthly Fee Statistics ---
   const photographerStats = useMemo(() => {

@@ -1098,7 +1098,7 @@ export default function TasksPage() {
                 min="1"
                 max={totalPages}
                 placeholder={language === "zh" ? "页码" : "Page"}
-                className="h-8 w-12 text-center text-xs font-bold p-0 rounded-xl bg-card nm-pressed focus-visible:ring-0 focus-visible:outline-none"
+                className="h-8 w-16 text-center text-xs font-bold p-0 rounded-xl bg-card nm-pressed focus-visible:ring-0 focus-visible:outline-none"
                 value={jumpInput}
                 onChange={(e) => setJumpInput(e.target.value)}
                 onKeyDown={(e) => {
